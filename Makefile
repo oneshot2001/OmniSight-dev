@@ -207,3 +207,48 @@ info:
 	@echo "Target Camera:   $(CAMERA_IP)"
 	@echo "Package Name:    $(PACKAGE_NAME)"
 	@echo ""
+
+## start: Start OMNISIGHT on camera
+start:
+	@echo "$(GREEN)Starting OMNISIGHT on camera $(CAMERA_IP)...$(NC)"
+	@curl -k --anyauth -u $(CAMERA_USER):$(CAMERA_PASS) \
+		"https://$(CAMERA_IP)/axis-cgi/applications/control.cgi?action=start&package=$(PROJECT_NAME)"
+	@echo "$(GREEN)OMNISIGHT started!$(NC)"
+
+## stop: Stop OMNISIGHT on camera
+stop:
+	@echo "$(YELLOW)Stopping OMNISIGHT on camera $(CAMERA_IP)...$(NC)"
+	@curl -k --anyauth -u $(CAMERA_USER):$(CAMERA_PASS) \
+		"https://$(CAMERA_IP)/axis-cgi/applications/control.cgi?action=stop&package=$(PROJECT_NAME)"
+	@echo "$(GREEN)OMNISIGHT stopped!$(NC)"
+
+## restart: Restart OMNISIGHT on camera
+restart: stop start
+	@echo "$(GREEN)OMNISIGHT restarted!$(NC)"
+
+## uninstall: Remove OMNISIGHT from camera
+uninstall: stop
+	@echo "$(RED)Uninstalling OMNISIGHT from camera $(CAMERA_IP)...$(NC)"
+	@curl -k --anyauth -u $(CAMERA_USER):$(CAMERA_PASS) \
+		"https://$(CAMERA_IP)/axis-cgi/applications/control.cgi?action=remove&package=$(PROJECT_NAME)"
+	@echo "$(GREEN)OMNISIGHT uninstalled!$(NC)"
+
+## deploy-all: Deploy to multiple cameras from cameras.txt
+deploy-all: package
+	@echo "$(GREEN)Deploying to all cameras...$(NC)"
+	@while IFS= read -r camera || [ -n "$$camera" ]; do \
+		echo "$(YELLOW)Deploying to $$camera...$(NC)"; \
+		make install CAMERA_IP=$$camera || echo "$(RED)Failed to deploy to $$camera$(NC)"; \
+	done < cameras.txt
+	@echo "$(GREEN)Multi-camera deployment complete!$(NC)"
+
+## monitor: Monitor OMNISIGHT statistics
+monitor:
+	@echo "$(GREEN)Monitoring OMNISIGHT on $(CAMERA_IP)...$(NC)"
+	@echo "Press Ctrl+C to stop"
+	@while true; do \
+		curl -sk --anyauth -u $(CAMERA_USER):$(CAMERA_PASS) \
+			"https://$(CAMERA_IP)/local/omnisight/api/stats" 2>/dev/null || echo "Failed to fetch stats"; \
+		sleep 5; \
+		clear; \
+	done

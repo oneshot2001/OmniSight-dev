@@ -4,13 +4,19 @@ The perception engine is the computer vision foundation of OMNISIGHT, responsibl
 
 ## Overview
 
-The perception engine processes video at 10 FPS, detecting and tracking objects using DLPU-accelerated deep learning models. It provides the foundation for Timeline Threading™ by:
+The perception engine processes video at 30 FPS, detecting and tracking objects using DLPU-accelerated deep learning models. It provides the foundation for Timeline Threading™ by:
 
 1. **Capturing video** from camera via VDO API
-2. **Detecting objects** using TensorFlow Lite models on ARTPEC-8 DLPU
-3. **Tracking objects** across frames to maintain identity
-4. **Analyzing behaviors** to identify suspicious activities
-5. **Calculating threat scores** for Timeline Threading
+2. **Detecting objects** using TensorFlow Lite models on ARTPEC-8 DLPU (<15ms)
+3. **Tracking objects** across frames to maintain identity (Kalman filter + IoU)
+4. **Analyzing behaviors** to identify suspicious activities (loitering, running, etc.)
+5. **Calculating threat scores** for Timeline Threading (weighted behavior analysis)
+
+### Performance Targets
+- **Latency**: <20ms total (VDO + ML + tracking + behavior)
+- **Throughput**: 30 FPS @ 1920x1080
+- **Tracks**: 100 simultaneous objects
+- **Memory**: ~26MB total
 
 ## Architecture
 
