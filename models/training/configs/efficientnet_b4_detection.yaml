@@ -1,0 +1,146 @@
+# OMNISIGHT Object Detection Model Configuration
+# EfficientNet-B4 optimized for ARTPEC-8 DLPU
+
+model:
+  name: "efficientnet_b4_detection"
+  architecture: "efficientnet_b4"
+  task: "object_detection"
+
+  # Input specifications
+  input:
+    height: 416
+    width: 416
+    channels: 3
+    format: "RGB"
+    normalization: "0-255"  # No normalization for INT8
+
+  # Output specifications
+  output:
+    num_classes: 6  # person, vehicle, face, package, animal, other
+    max_detections: 50
+    confidence_threshold: 0.5
+    nms_threshold: 0.4
+
+  # Model architecture
+  backbone:
+    name: "efficientnet_b4"
+    pretrained: true
+    freeze_layers: 0  # Number of layers to freeze
+
+  # Detection head
+  head:
+    type: "ssd"  # Single Shot Detector
+    num_anchors: 6
+    aspect_ratios: [0.5, 1.0, 2.0]
+    scales: [0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
+
+  # ARTPEC-8 optimizations
+  artpec8:
+    use_regular_conv: true  # Prefer regular over depthwise
+    kernel_size: 3  # Optimal for ARTPEC-8
+    filters_multiple: 6  # Filters divisible by 6
+    use_stride_2: true  # Use stride 2 for downsampling
+    activation: "relu"  # ReLU fuses with conv
+
+# Training configuration
+training:
+  epochs: 100
+  batch_size: 32
+  learning_rate: 0.001
+  optimizer: "adam"
+
+  # Learning rate schedule
+  lr_schedule:
+    type: "cosine_decay"
+    warmup_epochs: 5
+    min_lr: 0.00001
+
+  # Loss function
+  loss:
+    localization: "smooth_l1"
+    classification: "focal_loss"
+    alpha: 0.25
+    gamma: 2.0
+
+  # Data augmentation
+  augmentation:
+    horizontal_flip: true
+    vertical_flip: false
+    rotation_range: 15
+    zoom_range: 0.1
+    brightness_range: [0.8, 1.2]
+    contrast_range: [0.8, 1.2]
+    noise: 0.01
+
+  # Regularization
+  regularization:
+    weight_decay: 0.0001
+    dropout: 0.2
+    label_smoothing: 0.1
+
+# Dataset configuration
+dataset:
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+
+  # Class mapping
+  classes:
+    0: "background"
+    1: "person"
+    2: "vehicle"
+    3: "face"
+    4: "package"
+    5: "animal"
+    6: "other"
+
+  # Class weights for imbalanced dataset
+  class_weights:
+    person: 1.0
+    vehicle: 1.0
+    face: 1.5
+    package: 2.0
+    animal: 1.5
+    other: 0.5
+
+# Quantization configuration
+quantization:
+  mode: "post_training"
+  dtype: "int8"
+  per_tensor: true  # ARTPEC-8 requires per-tensor
+
+  # Calibration
+  calibration:
+    num_samples: 100
+    batch_size: 1
+    representative_dataset: true
+
+  # Optimization
+  optimization:
+    enable: true
+    target: "artpec8_dlpu"
+    ops_set: "tflite_builtins_int8"
+
+# Evaluation metrics
+evaluation:
+  metrics:
+    - "mAP"
+    - "precision"
+    - "recall"
+    - "f1_score"
+  iou_threshold: 0.5
+  confidence_threshold: 0.5
+
+# Model export
+export:
+  format: "tflite"
+  optimize: true
+  quantize: true
+  include_metadata: true
+
+# Performance targets
+targets:
+  inference_ms: 15  # Maximum inference time on DLPU
+  mAP: 0.70  # Minimum mean Average Precision
+  model_size_mb: 30  # Maximum model size
+  memory_mb: 85  # Maximum runtime memory
