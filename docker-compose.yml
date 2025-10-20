@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  omnisight-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omnisight-dev
+    image: omnisight-dev:latest
+
+    volumes:
+      # Mount source code for live development
+      - ./src:/opt/app/src
+      - ./models:/opt/app/models
+      - ./tests:/opt/app/tests
+      - ./scripts:/opt/app/scripts
+      - ./config:/opt/app/config
+      # Persistent build cache
+      - build-cache:/opt/app/build
+      - cargo-cache:/root/.cargo
+
+    ports:
+      # Application web interface
+      - "8080:8080"
+      # MQTT broker for swarm testing
+      - "1883:1883"
+      # Development/debug server
+      - "5000:5000"
+
+    environment:
+      # ACAP SDK settings
+      - ARCH=aarch64
+      - CROSS_COMPILE=aarch64-linux-gnu-
+      # Development mode
+      - OMNISIGHT_ENV=development
+      - DEBUG=1
+      # Camera connection (override with .env)
+      - CAMERA_IP=${CAMERA_IP:-192.168.1.100}
+      - CAMERA_USER=${CAMERA_USER:-root}
+      - CAMERA_PASS=${CAMERA_PASS:-pass}
+
+    networks:
+      - omnisight-net
+
+    # Keep container running for development
+    stdin_open: true
+    tty: true
+
+    command: /bin/bash
+
+  # MQTT broker for swarm intelligence testing
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: omnisight-mqtt
+    ports:
+      - "1884:1883"
+      - "9001:9001"
+    volumes:
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-logs:/mosquitto/log
+    networks:
+      - omnisight-net
+    restart: unless-stopped
+
+volumes:
+  build-cache:
+  cargo-cache:
+  mosquitto-data:
+  mosquitto-logs:
+
+networks:
+  omnisight-net:
+    driver: bridge
