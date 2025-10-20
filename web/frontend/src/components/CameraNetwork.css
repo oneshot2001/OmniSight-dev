@@ -1,0 +1,439 @@
+/* Camera Network Styles */
+
+.camera-network {
+  padding: 20px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  color: #e0e0e0;
+}
+
+.network-header {
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #2a2a4e 0%, #1a1a3e 100%);
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.network-header h2 {
+  margin: 0;
+  font-size: 28px;
+  background: linear-gradient(135deg, #6366f1 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.view-mode-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.view-mode-selector button {
+  background: #2a2a4e;
+  color: #e0e0e0;
+  border: 1px solid #3a3a5e;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.view-mode-selector button:hover {
+  background: #3a3a5e;
+  border-color: #6366f1;
+}
+
+.view-mode-selector button.active {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border-color: #6366f1;
+  font-weight: 600;
+}
+
+/* Network Stats */
+.network-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #2a2a4e 0%, #1a1a3e 100%);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border: 1px solid #3a3a5e;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.stat-icon {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #a0a0a0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* Network Content (Topology View) */
+.network-content {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 20px;
+}
+
+.network-canvas-container {
+  background: linear-gradient(135deg, #2a2a4e 0%, #1a1a3e 100%);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.network-canvas {
+  border: 2px solid #3a3a5e;
+  border-radius: 8px;
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+
+/* Camera Details Panel */
+.camera-details {
+  background: linear-gradient(135deg, #2a2a4e 0%, #1a1a3e 100%);
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.camera-details-panel {
+  max-height: 650px;
+  overflow-y: auto;
+}
+
+.camera-details-header {
+  background: linear-gradient(135deg, #3a3a6e 0%, #2a2a5e 100%);
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #3a3a5e;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.camera-details-header h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #e0e0e0;
+}
+
+.camera-status {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.camera-status.online {
+  background: #10b981;
+  color: white;
+}
+
+.camera-status.offline {
+  background: #6b7280;
+  color: white;
+}
+
+.camera-status.warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.camera-info,
+.camera-metrics,
+.camera-neighbors,
+.camera-swarm-stats {
+  padding: 20px;
+  border-bottom: 1px solid #3a3a5e;
+}
+
+.camera-metrics h4,
+.camera-neighbors h4,
+.camera-swarm-stats h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #a0a0a0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-row,
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #2a2a4e;
+}
+
+.info-row:last-child,
+.metric-row:last-child {
+  border-bottom: none;
+}
+
+.info-label,
+.metric-label {
+  font-size: 13px;
+  color: #a0a0a0;
+}
+
+.info-value,
+.metric-value {
+  font-size: 13px;
+  color: #e0e0e0;
+  font-weight: 600;
+}
+
+.neighbors-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.neighbor-tag {
+  background: #1a1a3e;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  border: 1px solid #3a3a5e;
+}
+
+.no-neighbors {
+  color: #a0a0a0;
+  font-style: italic;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Camera List View */
+.network-list {
+  background: linear-gradient(135deg, #2a2a4e 0%, #1a1a3e 100%);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.camera-list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.camera-list-item {
+  background: #1a1a3e;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 2px solid #3a3a5e;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.camera-list-item:hover {
+  transform: translateX(5px);
+  border-color: #6366f1;
+}
+
+.camera-list-item.selected {
+  border-color: #6366f1;
+  background: linear-gradient(135deg, #2a2a5e 0%, #1a1a3e 100%);
+}
+
+.camera-list-item.online {
+  border-left: 4px solid #10b981;
+}
+
+.camera-list-item.offline {
+  border-left: 4px solid #6b7280;
+}
+
+.camera-list-item.warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.camera-list-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.camera-list-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.camera-list-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.camera-list-meta {
+  font-size: 12px;
+  color: #a0a0a0;
+  display: flex;
+  gap: 8px;
+}
+
+.camera-list-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.list-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.list-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+.list-stat-label {
+  font-size: 10px;
+  color: #a0a0a0;
+  text-transform: uppercase;
+}
+
+.camera-list-status {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.camera-list-status.online {
+  background: #10b981;
+  color: white;
+}
+
+.camera-list-status.offline {
+  background: #6b7280;
+  color: white;
+}
+
+.camera-list-status.warning {
+  background: #f59e0b;
+  color: white;
+}
+
+/* Scrollbar Styling */
+.camera-details-panel::-webkit-scrollbar,
+.network-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.camera-details-panel::-webkit-scrollbar-track,
+.network-list::-webkit-scrollbar-track {
+  background: #1a1a3e;
+}
+
+.camera-details-panel::-webkit-scrollbar-thumb,
+.network-list::-webkit-scrollbar-thumb {
+  background: #3a3a5e;
+  border-radius: 4px;
+}
+
+.camera-details-panel::-webkit-scrollbar-thumb:hover,
+.network-list::-webkit-scrollbar-thumb:hover {
+  background: #4a4a6e;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .network-content {
+    grid-template-columns: 1fr;
+  }
+
+  .camera-details {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .network-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .network-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .network-canvas {
+    width: 100%;
+  }
+
+  .camera-list-item {
+    flex-wrap: wrap;
+  }
+
+  .camera-list-stats {
+    width: 100%;
+    justify-content: space-around;
+  }
+}
+
+@media (max-width: 480px) {
+  .network-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .camera-list-meta {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .camera-list-meta span:nth-child(2) {
+    display: none;
+  }
+}

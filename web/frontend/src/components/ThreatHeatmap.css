@@ -1,0 +1,254 @@
+/* Threat Heatmap Styles */
+
+.threat-heatmap {
+  padding: 20px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  color: #e0e0e0;
+}
+
+.threat-heatmap.loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.heatmap-header {
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, #2a2a4e 0%, #1a1a3e 100%);
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.heatmap-header h2 {
+  margin: 0 0 15px 0;
+  font-size: 28px;
+  background: linear-gradient(135deg, #ef4444 0%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heatmap-controls {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.heatmap-controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #a0a0a0;
+}
+
+.heatmap-controls select {
+  background: #2a2a4e;
+  color: #e0e0e0;
+  border: 1px solid #3a3a5e;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.heatmap-controls select:hover {
+  border-color: #ef4444;
+}
+
+.heatmap-controls input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #ef4444;
+}
+
+/* Heatmap Content */
+.heatmap-content {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 20px;
+}
+
+.heatmap-canvas-container {
+  background: linear-gradient(135deg, #2a2a4e 0%, #1a1a3e 100%);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.heatmap-canvas {
+  border: 2px solid #3a3a5e;
+  border-radius: 8px;
+  max-width: 100%;
+  height: auto;
+  cursor: crosshair;
+}
+
+/* Stats Panel */
+.heatmap-stats {
+  background: linear-gradient(135deg, #2a2a4e 0%, #1a1a3e 100%);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  max-height: 650px;
+}
+
+.heatmap-stats h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 20px;
+  color: #e0e0e0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: #1a1a3e;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #3a3a5e;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.stat-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #a0a0a0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Hotspots List */
+.hotspots-list {
+  margin-top: 20px;
+}
+
+.hotspots-list h4 {
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #e0e0e0;
+}
+
+.hotspot-card {
+  background: #1a1a3e;
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border-left: 3px solid #ef4444;
+  transition: transform 0.2s ease;
+}
+
+.hotspot-card:hover {
+  transform: translateX(5px);
+  background: #2a2a4e;
+}
+
+.hotspot-location {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.hotspot-coords {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #e0e0e0;
+  font-weight: 600;
+}
+
+.hotspot-threat {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hotspot-info {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  color: #a0a0a0;
+}
+
+.hotspot-info span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .heatmap-content {
+    grid-template-columns: 1fr;
+  }
+
+  .heatmap-stats {
+    max-height: none;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .heatmap-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .heatmap-canvas {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hotspot-location {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}

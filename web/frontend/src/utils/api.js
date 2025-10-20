@@ -61,9 +61,14 @@ export class OmnisightAPI {
     return this.request('/api/cameras');
   }
 
-  // GET /api/heatmap
-  async getHeatmap() {
-    return this.request('/api/heatmap');
+  // GET /api/heatmap?timeRange=60
+  async getHeatmap(timeRange = 60) {
+    return this.request(`/api/heatmap?timeRange=${timeRange}`);
+  }
+
+  // GET /api/timelines
+  async getTimelines() {
+    return this.request('/api/timelines');
   }
 
   // GET /api/config
