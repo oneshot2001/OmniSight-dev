@@ -1,0 +1,137 @@
+# OMNISIGHT Project .gitignore
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.project
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Build artifacts
+build/
+dist/
+*.o
+*.so
+*.a
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+
+# ACAP specific
+*.eap
+*.axpkg
+*.tar.gz
+package/
+.docker/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+
+# C/C++
+*.o
+*.so
+*.a
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Credentials and secrets
+.env
+.env.local
+*.pem
+*.key
+credentials.json
+secrets/
+*.secret
+
+# Model files (too large for git)
+*.h5
+*.pb
+*.tflite
+*.onnx
+*.pt
+*.pth
+models/*.bin
+models/*.safetensors
+
+# Data files
+data/
+datasets/
+*.csv
+*.json.gz
+*.parquet
+
+# Test coverage
+coverage/
+*.cover
+.coverage
+htmlcov/
+
+# Documentation builds
+site/
+_build/
+.doctrees/
+
+# Node.js (if using for tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk

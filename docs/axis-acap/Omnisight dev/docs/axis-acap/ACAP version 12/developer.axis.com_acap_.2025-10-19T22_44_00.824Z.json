@@ -1,0 +1,115 @@
+{
+  "data": {
+    "markdown": "[Skip to main content](https://developer.axis.com/acap/#__docusaurus_skipToContent_fallback)\n\n[![Axis Communications Logo](https://developer.axis.com/img/axis-logo.svg)\\\\\n**Axis developer documentation**](https://developer.axis.com/)\n\n[ACAP version 12](https://developer.axis.com/acap/)\n\n- [ACAP version 12](https://developer.axis.com/acap/)\n- [ACAP version 4](https://developer.axis.com/acap/4/)\n- [ACAP version 3](https://developer.axis.com/acap/3/)\n\n```\n\n```\n\n[Blog](https://developer.axis.com/blog/)\n\n- [ACAP version 12](https://developer.axis.com/acap/)\n- [Get started](https://developer.axis.com/acap/#)\n\n- [Develop ACAP applications](https://developer.axis.com/acap/develop/)\n\n- [Supported APIs](https://developer.axis.com/acap/api/)\n\n- [Version history](https://developer.axis.com/acap/version-history/)\n- [Axis devices & compatibility](https://developer.axis.com/acap/axis-devices-and-compatibility/)\n- [Computer vision on device](https://developer.axis.com/acap/computer-vision-on-device/)\n- [Cloud integrations](https://developer.axis.com/acap/cloud-integrations/)\n- [Service for partners](https://developer.axis.com/acap/#)\n\n- [FAQ](https://developer.axis.com/acap/faq/)\n\n- [Get help & give feedback](https://developer.axis.com/acap/get-help-and-give-feedback/)\n- [Develop container applications](https://developer.axis.com/acap/develop-container-applications/)\n\n- [Release notes](https://developer.axis.com/acap/release-notes/)\n\n\n- [Home page](https://developer.axis.com/)\n- ACAP version 12\n\nVersion: ACAP version 12\n\nOn this page\n\n# ACAP version 12\n\n![ACAP](https://developer.axis.com/assets/images/index-1bf0e8301162708dfe1e5c018d0f2d88.jpg)\n\nWelcome to the AXIS Camera Application Platform (ACAP) documentation. The\nACAP SDK is an open development framework designed to empower developers to\ncreate custom applications that run directly on Axis network devices, such\nas our cameras and intercoms. By leveraging the processing capabilities of\nthese devices, ACAP applications enable edge-based computing with on-device,\nlocal processing of data, reducing latency, and minimizing bandwidth usage.\n\nTo start out with ACAP development, see the [Get started](https://developer.axis.com/acap/get-started/set-up-developer-environment/pre-requisites/) section.\n\nGuides for specific topics can be found in [Develop ACAP applications](https://developer.axis.com/acap/develop/).\n\nFor detailed information about the APIs, see the [Native SDK API](https://developer.axis.com/acap/api/) section.\n\n## Use cases [​](https://developer.axis.com/acap/\\#use-cases \"Direct link to Use cases\")\n\nACAP makes it possible to develop applications for a wide range of use cases:\n\n- Security and safety applications that improve surveillance systems and facilitate investigation.\n- Business intelligence applications that improve business efficiency.\n- Product feature plug-ins that add value beyond the Axis product's core functionality.\n- Address customer specific use cases that can't be solved with off-the-shelf products.\n\n[![What is ACAP?](https://img.youtube.com/vi/vDgC11sXuwE/hqdefault.jpg)](https://www.youtube.com/watch?v=vDgC11sXuwE)\n\n## Key features [​](https://developer.axis.com/acap/\\#key-features \"Direct link to Key features\")\n\n- Access to most common product features, including video, the event and parameter systems, I/O ports, and more.\n- Enables hardware acceleration on specific functions such as image analysis computations and overlay graphics.\n- Toolchain with support for multiple architectures to build applications for all ACAP-enabled Axis products.\n- Documentation, tutorials and example applications for all APIs to kick-start your development.\n\n## Containerized SDK [​](https://developer.axis.com/acap/\\#containerized-sdk \"Direct link to Containerized SDK\")\n\nACAP development relies on the Docker toolchain, something we see many developers\nuse to manage their software. An important advantage of distributing a\ncontainerized SDK is that the ACAP development environment can be decoupled from\nthe underlying host operating system. This enables us to support development\nacross all Docker capable platforms, including not only Linux, but also Windows\nand macOS. Docker also offers a rich set of tools to build and ship software.\n\n## ACAP versioning [​](https://developer.axis.com/acap/\\#acap-versioning \"Direct link to ACAP versioning\")\n\nWhen developing ACAP applications, it is important to use a supported ACAP\nversion. What ACAP version is supported depends on which AXIS OS LTS is\ntargeted. From AXIS OS 12.0 (but not before) the ACAP version aligns with\nthe AXIS OS version. See the figure below to find what ACAP version is\nright for you. Note that the ACAP versions are clickable and take you to the\ncorresponding ACAP documentation version. See\n[Version history](https://developer.axis.com/acap/version-history/) for more information.\n\n[AXIS OS 12.0 to 12.x](https://www.axis.com/support/axis-os) [AXIS OS 2026 LTS](https://www.axis.com/support/axis-os)\n\n[ACAP version 12](https://developer.axis.com/acap)\n\n[AXIS OS 11.0 to 11.x](https://www.axis.com/support/axis-os) [AXIS OS 2024 LTS](https://www.axis.com/support/axis-os)\n\n[ACAP version 4](https://developer.axis.com/acap/4)\n\n[AXIS OS 10.0 to 10.x](https://www.axis.com/support/axis-os) [AXIS OS 2022 LTS](https://www.axis.com/support/axis-os)\n\n[ACAP version 3](https://developer.axis.com/acap/3)\n\n[AXIS OS 9.0 to 9.x](https://www.axis.com/support/axis-os) [AXIS OS 2020 LTS](https://www.axis.com/support/axis-os)\n\n[ACAP version 3](https://developer.axis.com/acap/3)\n\n2018\n\n2019\n\n2020\n\n2021\n\n2022\n\n2023\n\n2024\n\n2025\n\n2026\n\n2027\n\n2028\n\n2029\n\n2030\n\n2031\n\n2032\n\nLast updated on **Oct 6, 2025**\n\n[Next\\\\\n\\\\\nPre-requisites](https://developer.axis.com/acap/get-started/set-up-developer-environment/pre-requisites/)\n\n- [Use cases](https://developer.axis.com/acap/#use-cases)\n- [Key features](https://developer.axis.com/acap/#key-features)\n- [Containerized SDK](https://developer.axis.com/acap/#containerized-sdk)\n- [ACAP versioning](https://developer.axis.com/acap/#acap-versioning)\n\nCOMMUNITY\n\n- [Axis Developer Community](https://axis.com/developer-community)\n- [Axis on GitHub](https://github.com/AxisCommunications)\n\nSOCIAL\n\n- [LinkedIn](https://www.linkedin.com/company/axis-communications)\n- [YouTube](https://www.youtube.com/@AxisCommunications)\n\nLEGAL AND COMPLIANCE\n\n- [Legal](https://www.axis.com/legal)\n- [Privacy](https://www.axis.com/privacy)\n\n© 2025 Axis Communications AB. All rights reserved.",
+    "metadata": {
+      "ogUrl": "https://developer.axis.com/acap/",
+      "ogImage": "https://developer.axis.com/img/social.jpeg",
+      "docusaurus_locale": "en",
+      "og:url": "https://developer.axis.com/acap/",
+      "docusaurus_tag": "docs-acap-current",
+      "generator": "Docusaurus v3.9.1",
+      "description": "ACAP",
+      "twitter:card": "summary_large_image",
+      "og:description": "ACAP",
+      "title": "ACAP version 12 | Axis developer documentation",
+      "ogTitle": "ACAP version 12 | Axis developer documentation",
+      "og:title": "ACAP version 12 | Axis developer documentation",
+      "language": "en",
+      "viewport": "width=device-width, initial-scale=1.0",
+      "docusaurus_version": "current",
+      "og:locale": "en",
+      "favicon": "https://developer.axis.com/img/favicon.ico",
+      "ogLocale": "en",
+      "docsearch:docusaurus_tag": "docs-acap-current",
+      "docsearch:language": "en",
+      "ogDescription": "ACAP",
+      "og:image": "https://developer.axis.com/img/social.jpeg",
+      "twitter:image": "https://developer.axis.com/img/social.jpeg",
+      "docsearch:version": "current",
+      "scrapeId": "f032af56-2666-4dfd-8d11-d1af8766adf2",
+      "sourceURL": "https://developer.axis.com/acap/",
+      "url": "https://developer.axis.com/acap/",
+      "statusCode": 200,
+      "contentType": "text/html",
+      "proxyUsed": "basic",
+      "cacheState": "miss",
+      "creditsUsed": 1
+    }
+  },
+  "scrape_id": "f032af56-2666-4dfd-8d11-d1af8766adf2",
+  "id": "mx6KKzBYihRuJGNb_6mg9",
+  "startedAt": "2025-10-19T22:44:00.824Z",
+  "endedAt": "2025-10-19T22:44:08.129Z",
+  "endpoint": "scrape",
+  "formState": {
+    "extractSetupCompleted": false,
+    "urls": [],
+    "extractSchema": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "company_mission": {
+          "type": "string"
+        },
+        "supports_sso": {
+          "type": "boolean"
+        },
+        "is_open_source": {
+          "type": "boolean"
+        },
+        "is_in_yc": {
+          "type": "boolean"
+        }
+      }
+    },
+    "extractPrompt": "Extract the company details, following the schema.",
+    "enableWebSearch": false,
+    "options": {
+      "onlyMainContent": false,
+      "parsePDF": true,
+      "stealthMode": false,
+      "excludeTags": [],
+      "includeTags": [],
+      "waitFor": "",
+      "timeout": "",
+      "maxAge": "2 days",
+      "ignoreSitemap": false,
+      "crawlEntireDomain": false,
+      "sitemap": "include",
+      "limit": "10",
+      "maxDepth": "",
+      "excludePaths": [],
+      "includePaths": [],
+      "includeSubdomains": false,
+      "search": "",
+      "scrapeContentFromSearchResults": true,
+      "timeBasedSearch": "",
+      "location": "",
+      "prompt": ""
+    },
+    "formats": [
+      "markdown"
+    ],
+    "sources": [
+      "web"
+    ],
+    "categories": [],
+    "jsonSchema": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "company_name": {
+          "type": "string"
+        },
+        "company_description": {
+          "type": "string"
+        }
+      }
+    },
+    "agent": {},
+    "url": "developer.axis.com/acap/",
+    "endpoint": "scrape"
+  },
+  "status": "success",
+  "version": "QwZvSKhp5V8BDq1SwkIpv"
+}

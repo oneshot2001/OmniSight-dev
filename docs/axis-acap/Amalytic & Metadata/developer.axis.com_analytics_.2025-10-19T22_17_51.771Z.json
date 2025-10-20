@@ -1,0 +1,115 @@
+{
+  "data": {
+    "markdown": "[Skip to main content](https://developer.axis.com/analytics/#__docusaurus_skipToContent_fallback)\n\n[![Axis Communications Logo](https://developer.axis.com/img/axis-logo.svg)\\\\\n**Axis developer documentation**](https://developer.axis.com/)\n\n```\n\n```\n\n[Blog](https://developer.axis.com/blog/)\n\n- [Metadata & Analytics](https://developer.axis.com/analytics/)\n- [AXIS Object Analytics](https://developer.axis.com/analytics/#)\n\n- [AXIS Scene Metadata](https://developer.axis.com/analytics/axis-scene-metadata/)\n\n- [Cloud Integrations](https://developer.axis.com/analytics/#)\n\n- [Radar](https://developer.axis.com/analytics/#)\n\n\n- [Home page](https://developer.axis.com/)\n- Metadata & Analytics\n\n# Metadata & Analytics\n\nAxis Communications is renowned for its versatile product portfolio. These devices, including but not limited to cameras, radars, and thermal sensors, generate a broad spectrum of data, catering to a wide range of applications.\n\nData is the lifeblood of today's digital world, and Axis' devices are pivotal in this context. Their ability to capture and transmit diverse data types to the cloud allows for robust processing and in-depth analysis. This wealth of data provides a foundation for actionable insights, which can be visually represented in intuitive dashboards for real-time decision making. Moreover, the system can respond automatically to specific data patterns, streamlining operations, and reducing manual intervention. Thus, Axis Communications' devices are not just data sources, but key enablers of efficiency and productivity in data-driven operations.\n\n![use cases](https://developer.axis.com/assets/images/index.use-cases-e022c6cb710fcf6054ae4b963a0eb4da.png)\n\ninfo\n\nFor more context on the topic, please see [Developer Community](https://www.axis.com/developer-community/analytics).\n\nLast updated on **Aug 18, 2025**\n\n[Next\\\\\n\\\\\nVisualize AXIS Object Analytics data using Grafana® dashboard](https://developer.axis.com/analytics/axis-object-analytics/how-to-guides/visualize-axis-object-analytics-data-using-grafana-dashboard/)\n\nCOMMUNITY\n\n- [Axis Developer Community](https://axis.com/developer-community)\n- [Axis on GitHub](https://github.com/AxisCommunications)\n\nSOCIAL\n\n- [LinkedIn](https://www.linkedin.com/company/axis-communications)\n- [YouTube](https://www.youtube.com/@AxisCommunications)\n\nLEGAL AND COMPLIANCE\n\n- [Legal](https://www.axis.com/legal)\n- [Privacy](https://www.axis.com/privacy)\n\n© 2025 Axis Communications AB. All rights reserved.",
+    "metadata": {
+      "docusaurus_locale": "en",
+      "og:description": "Axis Communications is renowned for its versatile product portfolio. These devices, including but not limited to cameras, radars, and thermal sensors, generate a broad spectrum of data, catering to a wide range of applications.",
+      "ogDescription": "Axis Communications is renowned for its versatile product portfolio. These devices, including but not limited to cameras, radars, and thermal sensors, generate a broad spectrum of data, catering to a wide range of applications.",
+      "og:title": "Metadata & Analytics | Axis developer documentation",
+      "ogUrl": "https://developer.axis.com/analytics/",
+      "generator": "Docusaurus v3.9.1",
+      "description": "Axis Communications is renowned for its versatile product portfolio. These devices, including but not limited to cameras, radars, and thermal sensors, generate a broad spectrum of data, catering to a wide range of applications.",
+      "favicon": "https://developer.axis.com/img/favicon.ico",
+      "og:url": "https://developer.axis.com/analytics/",
+      "viewport": "width=device-width, initial-scale=1.0",
+      "docusaurus_tag": "docs-default-current",
+      "docsearch:version": "current",
+      "og:image": "https://developer.axis.com/img/social.jpeg",
+      "ogImage": "https://developer.axis.com/img/social.jpeg",
+      "docsearch:language": "en",
+      "twitter:card": "summary_large_image",
+      "language": "en",
+      "twitter:image": "https://developer.axis.com/img/social.jpeg",
+      "docusaurus_version": "current",
+      "docsearch:docusaurus_tag": "docs-default-current",
+      "title": "Metadata & Analytics | Axis developer documentation",
+      "ogLocale": "en",
+      "ogTitle": "Metadata & Analytics | Axis developer documentation",
+      "og:locale": "en",
+      "scrapeId": "a532112d-bb75-4ac0-8064-d0110b7ff959",
+      "sourceURL": "https://developer.axis.com/analytics/",
+      "url": "https://developer.axis.com/analytics/",
+      "statusCode": 200,
+      "contentType": "text/html",
+      "proxyUsed": "basic",
+      "cacheState": "miss",
+      "creditsUsed": 1
+    }
+  },
+  "scrape_id": "a532112d-bb75-4ac0-8064-d0110b7ff959",
+  "id": "3ut_GhEHa1kU6GBH8_SJc",
+  "startedAt": "2025-10-19T22:17:51.771Z",
+  "endedAt": "2025-10-19T22:18:06.275Z",
+  "endpoint": "scrape",
+  "formState": {
+    "extractSetupCompleted": false,
+    "urls": [],
+    "extractSchema": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "company_mission": {
+          "type": "string"
+        },
+        "supports_sso": {
+          "type": "boolean"
+        },
+        "is_open_source": {
+          "type": "boolean"
+        },
+        "is_in_yc": {
+          "type": "boolean"
+        }
+      }
+    },
+    "extractPrompt": "Extract the company details, following the schema.",
+    "enableWebSearch": false,
+    "options": {
+      "onlyMainContent": false,
+      "parsePDF": true,
+      "stealthMode": false,
+      "excludeTags": [],
+      "includeTags": [],
+      "waitFor": "",
+      "timeout": "",
+      "maxAge": "2 days",
+      "ignoreSitemap": false,
+      "crawlEntireDomain": false,
+      "sitemap": "include",
+      "limit": "10",
+      "maxDepth": "",
+      "excludePaths": [],
+      "includePaths": [],
+      "includeSubdomains": false,
+      "search": "",
+      "scrapeContentFromSearchResults": true,
+      "timeBasedSearch": "",
+      "location": "",
+      "prompt": ""
+    },
+    "formats": [
+      "markdown"
+    ],
+    "sources": [
+      "web"
+    ],
+    "categories": [],
+    "jsonSchema": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "company_name": {
+          "type": "string"
+        },
+        "company_description": {
+          "type": "string"
+        }
+      }
+    },
+    "agent": {},
+    "url": "developer.axis.com/analytics/",
+    "endpoint": "scrape"
+  },
+  "status": "success",
+  "version": "lVhd1pajfvc988N5nYOKq"
+}

@@ -1,0 +1,115 @@
+{
+  "data": {
+    "markdown": "[Skip to main content](https://developer.axis.com/guidelines/#__docusaurus_skipToContent_fallback)\n\n[![Axis Communications Logo](https://developer.axis.com/img/axis-logo.svg)\\\\\n**Axis developer documentation**](https://developer.axis.com/)\n\n```\n\n```\n\n[Blog](https://developer.axis.com/blog/)\n\n- [Guidelines](https://developer.axis.com/guidelines/)\n- [Testing](https://developer.axis.com/guidelines/testing/)\n\n- [Home page](https://developer.axis.com/)\n- Guidelines\n\n# Guidelines\n\nLearn from our experience in developing software tailored to Axis products.\n\nLast updated on **Aug 18, 2025**\n\n[Next\\\\\n\\\\\nTesting](https://developer.axis.com/guidelines/testing/)\n\nCOMMUNITY\n\n- [Axis Developer Community](https://axis.com/developer-community)\n- [Axis on GitHub](https://github.com/AxisCommunications)\n\nSOCIAL\n\n- [LinkedIn](https://www.linkedin.com/company/axis-communications)\n- [YouTube](https://www.youtube.com/@AxisCommunications)\n\nLEGAL AND COMPLIANCE\n\n- [Legal](https://www.axis.com/legal)\n- [Privacy](https://www.axis.com/privacy)\n\n© 2025 Axis Communications AB. All rights reserved.",
+    "metadata": {
+      "ogUrl": "https://developer.axis.com/guidelines/",
+      "ogTitle": "Guidelines | Axis developer documentation",
+      "ogDescription": "Learn from our experience in developing software tailored to Axis products.",
+      "ogLocale": "en",
+      "generator": "Docusaurus v3.9.1",
+      "twitter:card": "summary_large_image",
+      "docusaurus_tag": "docs-default-current",
+      "og:title": "Guidelines | Axis developer documentation",
+      "description": "Learn from our experience in developing software tailored to Axis products.",
+      "og:url": "https://developer.axis.com/guidelines/",
+      "docusaurus_version": "current",
+      "viewport": "width=device-width, initial-scale=1.0",
+      "favicon": "https://developer.axis.com/img/favicon.ico",
+      "og:description": "Learn from our experience in developing software tailored to Axis products.",
+      "og:image": "https://developer.axis.com/img/social.jpeg",
+      "language": "en",
+      "docusaurus_locale": "en",
+      "docsearch:language": "en",
+      "title": "Guidelines | Axis developer documentation",
+      "docsearch:docusaurus_tag": "docs-default-current",
+      "twitter:image": "https://developer.axis.com/img/social.jpeg",
+      "docsearch:version": "current",
+      "og:locale": "en",
+      "ogImage": "https://developer.axis.com/img/social.jpeg",
+      "scrapeId": "a6a78362-4ad5-4f27-b7dc-302d3dcc9eb3",
+      "sourceURL": "https://developer.axis.com/guidelines/",
+      "url": "https://developer.axis.com/guidelines/",
+      "statusCode": 200,
+      "contentType": "text/html",
+      "proxyUsed": "basic",
+      "cacheState": "miss",
+      "creditsUsed": 1
+    }
+  },
+  "scrape_id": "a6a78362-4ad5-4f27-b7dc-302d3dcc9eb3",
+  "id": "zH2Oj598ixhvX6UIcP6ZC",
+  "startedAt": "2025-10-19T22:47:59.267Z",
+  "endedAt": "2025-10-19T22:48:09.378Z",
+  "endpoint": "scrape",
+  "formState": {
+    "extractSetupCompleted": false,
+    "urls": [],
+    "extractSchema": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "company_mission": {
+          "type": "string"
+        },
+        "supports_sso": {
+          "type": "boolean"
+        },
+        "is_open_source": {
+          "type": "boolean"
+        },
+        "is_in_yc": {
+          "type": "boolean"
+        }
+      }
+    },
+    "extractPrompt": "Extract the company details, following the schema.",
+    "enableWebSearch": false,
+    "options": {
+      "onlyMainContent": false,
+      "parsePDF": true,
+      "stealthMode": false,
+      "excludeTags": [],
+      "includeTags": [],
+      "waitFor": "",
+      "timeout": "",
+      "maxAge": "2 days",
+      "ignoreSitemap": false,
+      "crawlEntireDomain": false,
+      "sitemap": "include",
+      "limit": "10",
+      "maxDepth": "",
+      "excludePaths": [],
+      "includePaths": [],
+      "includeSubdomains": false,
+      "search": "",
+      "scrapeContentFromSearchResults": true,
+      "timeBasedSearch": "",
+      "location": "",
+      "prompt": ""
+    },
+    "formats": [
+      "markdown"
+    ],
+    "sources": [
+      "web"
+    ],
+    "categories": [],
+    "jsonSchema": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "company_name": {
+          "type": "string"
+        },
+        "company_description": {
+          "type": "string"
+        }
+      }
+    },
+    "agent": {},
+    "url": "developer.axis.com/guidelines/",
+    "endpoint": "scrape"
+  },
+  "status": "success",
+  "version": "a6nn0wVp14kaBm081MRT6"
+}
