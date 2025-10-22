@@ -45,38 +45,51 @@ rm -rf "$PACKAGE_DIR"
 mkdir -p "$PACKAGE_DIR"
 mkdir -p "$PACKAGE_DIR/html"
 mkdir -p "$PACKAGE_DIR/html/img"
+mkdir -p "$PACKAGE_DIR/app"
+mkdir -p "$PACKAGE_DIR/app/api"
 mkdir -p "$PACKAGE_DIR/lib"
 mkdir -p "$OUTPUT_DIR"
 
-# Step 3: Create a minimal Python web server
-echo "Step 3: Creating minimal web server..."
+# Step 3: Copy Flask application
+echo ""
+echo "Step 3: Packaging Flask API server..."
 
-# Create a simple Python HTTP server that serves the HTML directory
+# Copy Flask app files
+cp -r "$PROJECT_ROOT/app/"* "$PACKAGE_DIR/app/"
+echo "  ✓ Copied Flask application"
+
+# Create main executable that runs Flask server
 cat > "$PACKAGE_DIR/omnisight" << 'EOF'
-#!/usr/bin/env python3
-import http.server
-import socketserver
-import os
+#!/bin/sh
+# OMNISIGHT Flask API Server Launcher
 
-# Change to the html directory
-os.chdir('/usr/local/packages/omnisight/html')
+# Set environment variables
+export OMNISIGHT_HTML_DIR="/usr/local/packages/omnisight/html"
+export PYTHONPATH="/usr/local/packages/omnisight:$PYTHONPATH"
 
-# Simple HTTP server on port 8080
-PORT = 8080
-Handler = http.server.SimpleHTTPRequestHandler
+# Change to app directory
+cd /usr/local/packages/omnisight/app
 
-with socketserver.TCPServer(("", PORT), Handler) as httpd:
-    print(f"OMNISIGHT web server running on port {PORT}")
-    httpd.serve_forever()
+# Install dependencies if needed (first run)
+if [ ! -f /tmp/omnisight-deps-installed ]; then
+    echo "Installing Flask dependencies..."
+    pip3 install --no-cache-dir -r requirements.txt
+    touch /tmp/omnisight-deps-installed
+fi
+
+# Start Flask server
+echo "Starting OMNISIGHT Flask API Server..."
+exec python3 server.py
 EOF
 chmod +x "$PACKAGE_DIR/omnisight"
-echo "  ✓ Created Python web server"
+echo "  ✓ Created Flask launcher script"
 
 # Copy manifest (use camera-compatible manifest for ACAP packaging)
 cp "$PROJECT_ROOT/scripts/manifest-camera.json" "$PACKAGE_DIR/manifest.json"
 echo "  ✓ Copied manifest.json"
 
 # Step 4: Create LICENSE file (in both package dir and project root for eap-create.sh)
+echo ""
 echo "Step 4: Creating LICENSE..."
 cat > "$PACKAGE_DIR/LICENSE" << 'EOF'
 Copyright (c) 2024-2025 OMNISIGHT Project
@@ -97,6 +110,7 @@ cp "$PACKAGE_DIR/LICENSE" "$PROJECT_ROOT/LICENSE"
 echo "  ✓ Created LICENSE (package and project root)"
 
 # Step 5: Create basic HTML interface
+echo ""
 echo "Step 5: Creating web interface..."
 cat > "$PACKAGE_DIR/html/index.html" << 'EOF'
 <!DOCTYPE html>
@@ -181,6 +195,23 @@ cat > "$PACKAGE_DIR/html/index.html" << 'EOF'
             margin-top: 30px;
             font-size: 0.9em;
         }
+        .api-info {
+            background: #fff9e6;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .api-info h3 {
+            color: #f39c12;
+            margin-bottom: 10px;
+        }
+        .endpoint {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #555;
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -196,11 +227,11 @@ cat > "$PACKAGE_DIR/html/index.html" << 'EOF'
             </div>
             <div class="metric">
                 <div class="metric-label">Mode</div>
-                <div class="metric-value">Stub/Demo</div>
+                <div class="metric-value">Phase 2 - API Ready</div>
             </div>
             <div class="metric">
                 <div class="metric-label">Version</div>
-                <div class="metric-value">0.1.0</div>
+                <div class="metric-value">0.2.0</div>
             </div>
         </div>
 
@@ -208,19 +239,36 @@ cat > "$PACKAGE_DIR/html/index.html" << 'EOF'
             <h3>Active Modules</h3>
             <div class="feature">Perception Engine - Object detection and tracking</div>
             <div class="feature">Timeline Threading™ - Predicting 3-5 probable futures</div>
-            <div class="feature">Swarm Intelligence - Multi-camera coordination (stub)</div>
+            <div class="feature">Swarm Intelligence - Multi-camera coordination</div>
+        </div>
+
+        <div class="api-info">
+            <h3>REST API Endpoints</h3>
+            <div class="endpoint">GET /api/perception/status</div>
+            <div class="endpoint">GET /api/perception/detections</div>
+            <div class="endpoint">GET /api/timeline/predictions</div>
+            <div class="endpoint">GET /api/timeline/history</div>
+            <div class="endpoint">GET /api/swarm/network</div>
+            <div class="endpoint">GET /api/swarm/cameras</div>
+            <div class="endpoint">GET /api/config</div>
+            <div class="endpoint">POST /api/config</div>
+            <div class="endpoint">GET /api/stats</div>
+            <div class="endpoint">GET /api/health</div>
         </div>
 
         <div class="features">
             <h3>Features</h3>
-            <div class="feature">Real-time object tracking simulation</div>
-            <div class="feature">Predictive timeline generation</div>
+            <div class="feature">Real-time object tracking (stub data)</div>
+            <div class="feature">Predictive timeline generation (stub data)</div>
             <div class="feature">Event detection and classification</div>
             <div class="feature">Threat assessment scoring</div>
+            <div class="feature">REST API with JSON responses</div>
+            <div class="feature">Reverse proxy integration</div>
         </div>
 
         <div class="version">
-            OMNISIGHT v0.1.0 | Development Build<br>
+            OMNISIGHT v0.2.0 | Phase 2 Development Build<br>
+            Flask API Server with stub data responses<br>
             © 2024-2025 OMNISIGHT Project
         </div>
     </div>
@@ -234,7 +282,8 @@ cat > "$PACKAGE_DIR/html/img/icon.png" << 'EOF'
 This would be a PNG file in production
 EOF
 
-# Step 6: Create CGI script in html directory (will be accessible)
+# Step 6: Create CGI script in html directory (for backward compatibility)
+echo ""
 echo "Step 6: Creating CGI index page..."
 
 # Create index.cgi in html directory
@@ -283,14 +332,14 @@ cat <<'HTMLEOF'
 <body>
     <div class="container">
         <h1>OMNISIGHT</h1>
-        <div class="tagline">Precognitive Security System - Demo Mode</div>
+        <div class="tagline">Precognitive Security System - Phase 2</div>
         <div class="status">
             <h3>System Status</h3>
-            <div class="metric">Status: Active (Stub/Demo)</div>
-            <div class="metric">Mode: Static Web Interface</div>
-            <div class="metric">Version: 0.1.3</div>
+            <div class="metric">Status: Active (API Ready)</div>
+            <div class="metric">Mode: Flask API Server</div>
+            <div class="metric">Version: 0.2.0</div>
         </div>
-        <p><strong>Note:</strong> This is a static demo version. Full functionality requires hardware integration.</p>
+        <p><strong>Note:</strong> REST API endpoints available at /api/* paths.</p>
     </div>
 </body>
 </html>
@@ -356,6 +405,11 @@ if [ -f "$PACKAGE_DIR"/*.eap ]; then
     echo "  2. Deploy to camera:"
     echo "     - Web UI: https://camera-ip → Settings → Apps → Upload"
     echo "     - CLI: curl -u root:pass -F 'package=@$EAP_NAME' https://camera-ip/axis-cgi/applications/upload.cgi"
+    echo ""
+    echo "  3. Test API endpoints:"
+    echo "     - https://camera-ip/local/omnisight/api/health"
+    echo "     - https://camera-ip/local/omnisight/api/perception/status"
+    echo "     - https://camera-ip/local/omnisight/api/stats"
     echo ""
 else
     echo "${RED}ERROR: .eap file not created${NC}"
