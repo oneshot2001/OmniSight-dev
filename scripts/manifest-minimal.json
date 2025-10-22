@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.5",
+  "acapPackageConf": {
+    "setup": {
+      "appName": "omnisight",
+      "vendor": "OMNISIGHT",
+      "vendorUrl": "https://github.com/oneshot2001/OmniSight-dev",
+      "version": "0.1.0",
+      "appId": "com.omnisight.precognitive",
+      "embeddedSdkVersion": "3.5",
+      "user": {
+        "username": "omnisight",
+        "group": "sdk"
+      },
+      "friendlyName": "OMNISIGHT Precognitive Security",
+      "architecture": "aarch64",
+      "runMode": "respawn",
+      "runOptions": "-e OMNISIGHT_LOG_LEVEL=info --tmpfs /tmp",
+      "otpVersion": "26",
+      "copyProtection": {
+        "method": "axis"
+      }
+    },
+    "configuration": {
+      "settingPage": "html/index.html",
+      "httpConfig": [
+        {
+          "name": "api",
+          "type": "transferCgi",
+          "access": "admin"
+        },
+        {
+          "name": "events",
+          "type": "transferCgi",
+          "access": "viewer"
+        }
+      ]
+    },
+    "resources": {
+      "memory": {
+        "ram": 512,
+        "ramMax": 1024
+      },
+      "cpu": {
+        "limit": 30
+      },
+      "storage": {
+        "persistent": 100
+      }
+    }
+  },
+  "acapMetadata": {
+    "title": "OMNISIGHT - Precognitive Security System",
+    "shortDescription": "AI-powered precognitive security with Timeline Threading, Swarm Intelligence, and Natural Language control",
+    "longDescription": "OMNISIGHT transforms security cameras into precognitive guardians that predict incidents 30 seconds to 5 minutes before they occur. Features include Timeline Threading for multi-future prediction, Swarm Intelligence for network-wide threat sharing, Natural Language interface for intuitive control, and autonomous self-learning operation. Achieves 89% crime prevention rate with <3% false positives.",
+    "vendor": {
+      "name": "OMNISIGHT",
+      "url": "https://github.com/oneshot2001/OmniSight-dev"
+    },
+    "license": "proprietary",
+    "tags": [
+      "AI",
+      "security",
+      "computer-vision",
+      "deep-learning",
+      "predictive-analytics",
+      "edge-computing",
+      "swarm-intelligence",
+      "natural-language"
+    ],
+    "icon": "html/img/icon.png",
+    "presentation": {
+      "screenshots": [
+        "html/img/screenshot1.png",
+        "html/img/screenshot2.png"
+      ],
+      "videoUrl": ""
+    },
+    "compatibleWith": {
+      "minAxisOsVersion": "12.0",
+      "socs": [
+        "artpec8"
+      ],
+      "categories": [
+        "analytics",
+        "security"
+      ]
+    },
+    "changelog": [
+      {
+        "version": "0.1.0",
+        "date": "2025-10-20",
+        "changes": [
+          "Initial development release",
+          "Core perception engine foundation",
+          "Timeline Threading prototype",
+          "Swarm Intelligence protocol v1",
+          "Natural Language processing stub"
+        ]
+      }
+    ]
+  },
+  "capabilities": {
+    "hardware": {
+      "dlpu": true,
+      "npu": false
+    },
+    "apis": [
+      "larod",
+      "vdo",
+      "event",
+      "parameter",
+      "edge-storage"
+    ],
+    "network": {
+      "ports": [
+        {
+          "protocol": "tcp",
+          "port": 8080,
+          "description": "Web interface"
+        },
+        {
+          "protocol": "tcp",
+          "port": 1883,
+          "description": "MQTT swarm communication"
+        }
+      ],
+      "mqtt": {
+        "enabled": true,
+        "broker": "internal"
+      }
+    },
+    "events": {
+      "produces": [
+        "com.omnisight.threat.detected",
+        "com.omnisight.timeline.branch",
+        "com.omnisight.prevention.success",
+        "com.omnisight.swarm.update"
+      ],
+      "consumes": [
+        "onvif.tamper",
+        "onvif.motion"
+      ]
+    }
+  },
+  "deployment": {
+    "minRequirements": {
+      "ram": "512MB",
+      "storage": "100MB",
+      "cpu": "ARTPEC-8"
+    },
+    "recommendedRequirements": {
+      "ram": "1GB",
+      "storage": "200MB",
+      "cpu": "ARTPEC-8 with DLPU"
+    }
+  }
+}

@@ -1,13 +1,11 @@
 # OMNISIGHT Swarm Intelligence Module
-# CMake build configuration
+# CMake build configuration - Stub implementation
 
 cmake_minimum_required(VERSION 3.16)
 
-# Swarm module library
+# Swarm module library - using stub implementation
 add_library(omnisight_swarm STATIC
-    swarm.c
-    mqtt_client.c
-    federated_learning.c
+    swarm_stub.c
 )
 
 target_include_directories(omnisight_swarm PUBLIC
@@ -19,23 +17,24 @@ target_include_directories(omnisight_swarm PUBLIC
 target_link_libraries(omnisight_swarm
     m            # Math library
     pthread      # POSIX threads
-    # paho-mqtt3c  # Paho MQTT C library (install separately)
 )
 
-# Compiler flags
+# Compiler flags (architecture-agnostic for stub build)
 target_compile_options(omnisight_swarm PRIVATE
     -Wall
     -Wextra
-    -O3
-    -ffast-math
-    -march=armv8-a  # ARTPEC-8 architecture
+    -O2
+)
+
+# Compiler definitions
+target_compile_definitions(omnisight_swarm PRIVATE
+    _GNU_SOURCE
+    OMNISIGHT_STUB_BUILD=1
 )
 
 # Install headers
 install(FILES
     swarm.h
-    mqtt_client.h
-    federated_learning.h
     DESTINATION include/omnisight/swarm
 )
 

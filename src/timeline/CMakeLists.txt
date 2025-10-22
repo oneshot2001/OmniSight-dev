@@ -1,13 +1,11 @@
 # OMNISIGHT Timeline Threading™ Module
-# CMake build configuration
+# CMake build configuration - Stub implementation
 
 cmake_minimum_required(VERSION 3.16)
 
-# Timeline module library
+# Timeline module library - using stub implementation
 add_library(omnisight_timeline STATIC
-    timeline.c
-    trajectory_predictor.c
-    event_predictor.c
+    timeline_stub.c
 )
 
 target_include_directories(omnisight_timeline PUBLIC
@@ -19,20 +17,22 @@ target_link_libraries(omnisight_timeline
     m  # Math library
 )
 
-# Compiler flags for optimization
+# Compiler flags (architecture-agnostic for stub build)
 target_compile_options(omnisight_timeline PRIVATE
     -Wall
     -Wextra
-    -O3
-    -ffast-math
-    -march=armv8-a  # ARTPEC-8 architecture
+    -O2
+)
+
+# Compiler definitions
+target_compile_definitions(omnisight_timeline PRIVATE
+    _GNU_SOURCE
+    OMNISIGHT_STUB_BUILD=1
 )
 
 # Install headers
 install(FILES
     timeline.h
-    trajectory_predictor.h
-    event_predictor.h
     DESTINATION include/omnisight/timeline
 )
 

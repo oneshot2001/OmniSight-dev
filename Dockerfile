@@ -71,8 +71,8 @@ RUN mkdir -p /opt/app/src \
     /opt/app/build \
     /opt/app/package
 
-# Set up build scripts
-COPY scripts/* /usr/local/bin/ 2>/dev/null || true
+# Set up build scripts (if they exist)
+# COPY scripts/* /usr/local/bin/
 
 # Expose ports for development
 # 8080 - Application web interface
