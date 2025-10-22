@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.5",
+  "acapPackageConf": {
+    "setup": {
+      "appName": "omnisight",
+      "vendor": "OMNISIGHT",
+      "vendorUrl": "https://github.com/oneshot2001/OmniSight-dev",
+      "version": "0.1.8",
+      "appId": 1001,
+      "embeddedSdkVersion": "3.5",
+      "user": {
+        "username": "sdk",
+        "group": "sdk"
+      },
+      "friendlyName": "OMNISIGHT",
+      "architecture": "aarch64",
+      "runMode": "respawn",
+      "runOptions": ""
+    },
+    "configuration": {
+      "settingPage": "index.html"
+    },
+    "resources": {
+      "memory": {
+        "ram": 128,
+        "ramMax": 256
+      }
+    }
+  }
+}

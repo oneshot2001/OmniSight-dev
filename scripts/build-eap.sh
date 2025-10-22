@@ -48,16 +48,32 @@ mkdir -p "$PACKAGE_DIR/html/img"
 mkdir -p "$PACKAGE_DIR/lib"
 mkdir -p "$OUTPUT_DIR"
 
-# Step 3: Copy application files
-echo "Step 3: Copying application files..."
+# Step 3: Create a minimal Python web server
+echo "Step 3: Creating minimal web server..."
 
-# Copy executable
-cp "$BUILD_DIR/omnisight" "$PACKAGE_DIR/"
+# Create a simple Python HTTP server that serves the HTML directory
+cat > "$PACKAGE_DIR/omnisight" << 'EOF'
+#!/usr/bin/env python3
+import http.server
+import socketserver
+import os
+
+# Change to the html directory
+os.chdir('/usr/local/packages/omnisight/html')
+
+# Simple HTTP server on port 8080
+PORT = 8080
+Handler = http.server.SimpleHTTPRequestHandler
+
+with socketserver.TCPServer(("", PORT), Handler) as httpd:
+    print(f"OMNISIGHT web server running on port {PORT}")
+    httpd.serve_forever()
+EOF
 chmod +x "$PACKAGE_DIR/omnisight"
-echo "  ✓ Copied omnisight executable"
+echo "  ✓ Created Python web server"
 
-# Copy manifest (use minimal manifest for ACAP packaging)
-cp "$PROJECT_ROOT/scripts/manifest-minimal.json" "$PACKAGE_DIR/manifest.json"
+# Copy manifest (use camera-compatible manifest for ACAP packaging)
+cp "$PROJECT_ROOT/scripts/manifest-camera.json" "$PACKAGE_DIR/manifest.json"
 echo "  ✓ Copied manifest.json"
 
 # Step 4: Create LICENSE file (in both package dir and project root for eap-create.sh)
@@ -218,17 +234,70 @@ cat > "$PACKAGE_DIR/html/img/icon.png" << 'EOF'
 This would be a PNG file in production
 EOF
 
-# Step 6: Create application start script
-echo "Step 6: Creating start script..."
-cat > "$PACKAGE_DIR/start.sh" << 'EOF'
-#!/bin/sh
-# OMNISIGHT Start Script
+# Step 6: Create CGI script in html directory (will be accessible)
+echo "Step 6: Creating CGI index page..."
 
-# Run in demo mode (no swarm) for stub build
-exec /usr/local/packages/omnisight/omnisight --demo
+# Create index.cgi in html directory
+cat > "$PACKAGE_DIR/html/index.cgi" << 'EOF'
+#!/bin/sh
+echo "Content-Type: text/html"
+echo ""
+cat <<'HTMLEOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMNISIGHT - Precognitive Security</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #667eea; margin-bottom: 10px; font-size: 2.5em; }
+        .tagline { color: #666; font-size: 1.2em; margin-bottom: 30px; }
+        .status {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .metric { display: inline-block; margin: 10px 20px 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OMNISIGHT</h1>
+        <div class="tagline">Precognitive Security System - Demo Mode</div>
+        <div class="status">
+            <h3>System Status</h3>
+            <div class="metric">Status: Active (Stub/Demo)</div>
+            <div class="metric">Mode: Static Web Interface</div>
+            <div class="metric">Version: 0.1.3</div>
+        </div>
+        <p><strong>Note:</strong> This is a static demo version. Full functionality requires hardware integration.</p>
+    </div>
+</body>
+</html>
+HTMLEOF
 EOF
-chmod +x "$PACKAGE_DIR/start.sh"
-echo "  ✓ Created start script"
+chmod +x "$PACKAGE_DIR/html/index.cgi"
+echo "  ✓ Created CGI index page in html/"
 
 # Step 7: Show package contents
 echo ""

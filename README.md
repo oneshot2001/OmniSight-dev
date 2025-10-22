@@ -168,10 +168,19 @@ make install CAMERA_IP=192.168.1.100
 
 ## Documentation
 
+### Product & Requirements
 - [Product Requirements Document](docs/axis-acap/Markdown%20versions/omnisight-prd.md)
 - [Axis ACAP Documentation](docs/README.md)
-- [Architecture Design](docs/ARCHITECTURE.md) - Coming soon
-- [API Reference](docs/API.md) - Coming soon
+
+### Development Guides
+- [ACAP Packaging Guide](ACAP_PACKAGING.md) - Complete guide for building and deploying .eap packages
+- [Phase 1 Status](PHASE1_STATUS.md) - Current development progress
+- [Testing & Deployment](TESTING_AND_DEPLOYMENT.md) - Hardware requirements and deployment procedures
+- [Stub Build Guide](STUB_BUILD.md) - Building and testing stub implementations
+
+### Coming Soon
+- [Architecture Design](docs/ARCHITECTURE.md)
+- [API Reference](docs/API.md)
 
 ## Testing
 
