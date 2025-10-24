@@ -1,0 +1,26 @@
+{
+  "module": "perception",
+  "timestamp": "2025-10-24T12:00:00Z",
+  "settings": {
+    "detection_threshold": 0.75,
+    "tracking_enabled": true,
+    "max_tracks": 100,
+    "track_timeout_seconds": 5,
+    "object_classes": ["person", "vehicle", "animal"],
+    "dlpu": {
+      "enabled": false,
+      "model": "stub_detector_v1",
+      "max_batch_size": 1
+    },
+    "vdo": {
+      "enabled": false,
+      "resolution": "1920x1080",
+      "fps": 30,
+      "format": "H264"
+    }
+  },
+  "performance": {
+    "target_fps": 10,
+    "max_latency_ms": 100
+  }
+}

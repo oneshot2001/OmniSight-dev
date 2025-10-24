@@ -1,0 +1,38 @@
+{
+  "frame_id": 12345,
+  "timestamp": "2025-10-24T12:00:00Z",
+  "detections": [
+    {
+      "id": 1,
+      "type": "person",
+      "bbox": [100, 200, 50, 150],
+      "confidence": 0.95,
+      "track_id": "T001",
+      "velocity": [2.3, 0.1],
+      "predicted_position": [105, 201]
+    },
+    {
+      "id": 2,
+      "type": "vehicle",
+      "bbox": [300, 150, 120, 80],
+      "confidence": 0.89,
+      "track_id": "T002",
+      "velocity": [5.7, 0.0],
+      "predicted_position": [308, 150]
+    },
+    {
+      "id": 3,
+      "type": "person",
+      "bbox": [450, 280, 45, 140],
+      "confidence": 0.92,
+      "track_id": "T003",
+      "velocity": [-1.2, 0.8],
+      "predicted_position": [447, 281]
+    }
+  ],
+  "metadata": {
+    "total_detections": 3,
+    "processing_time_ms": 18,
+    "camera_id": "M4228-LVE-001"
+  }
+}

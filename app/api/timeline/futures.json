@@ -1,0 +1,57 @@
+{
+  "timestamp": "2025-10-24T12:00:00Z",
+  "futures": [
+    {
+      "future_id": "F001",
+      "base_prediction": "P001",
+      "branch_point": 1.5,
+      "probability": 0.35,
+      "scenario": "person_changes_direction",
+      "events": [
+        {
+          "time_offset": 2.0,
+          "position": [110, 215],
+          "action": "turning",
+          "probability": 0.75
+        },
+        {
+          "time_offset": 3.0,
+          "position": [112, 230],
+          "action": "entering_area",
+          "probability": 0.68
+        }
+      ],
+      "threat_score": 0.58,
+      "requires_alert": true
+    },
+    {
+      "future_id": "F002",
+      "base_prediction": "P003",
+      "branch_point": 1.2,
+      "probability": 0.28,
+      "scenario": "interaction_becomes_confrontation",
+      "events": [
+        {
+          "time_offset": 2.0,
+          "position": [443, 282],
+          "action": "aggressive_gesture",
+          "probability": 0.62
+        },
+        {
+          "time_offset": 3.5,
+          "position": [440, 285],
+          "action": "physical_altercation",
+          "probability": 0.45
+        }
+      ],
+      "threat_score": 0.82,
+      "requires_alert": true
+    }
+  ],
+  "statistics": {
+    "total_futures": 2,
+    "high_threat_futures": 2,
+    "branching_depth": 3,
+    "computation_time_ms": 45
+  }
+}

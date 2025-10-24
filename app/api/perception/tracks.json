@@ -1,0 +1,55 @@
+{
+  "timestamp": "2025-10-24T12:00:00Z",
+  "active_tracks": [
+    {
+      "track_id": "T001",
+      "type": "person",
+      "first_seen": "2025-10-24T11:58:32Z",
+      "last_seen": "2025-10-24T12:00:00Z",
+      "frames_tracked": 88,
+      "current_bbox": [100, 200, 50, 150],
+      "trajectory": [
+        [95, 195],
+        [97, 197],
+        [100, 200]
+      ],
+      "velocity": [2.3, 0.1],
+      "confidence": 0.95
+    },
+    {
+      "track_id": "T002",
+      "type": "vehicle",
+      "first_seen": "2025-10-24T11:59:15Z",
+      "last_seen": "2025-10-24T12:00:00Z",
+      "frames_tracked": 45,
+      "current_bbox": [300, 150, 120, 80],
+      "trajectory": [
+        [280, 150],
+        [290, 150],
+        [300, 150]
+      ],
+      "velocity": [5.7, 0.0],
+      "confidence": 0.89
+    },
+    {
+      "track_id": "T003",
+      "type": "person",
+      "first_seen": "2025-10-24T11:59:48Z",
+      "last_seen": "2025-10-24T12:00:00Z",
+      "frames_tracked": 12,
+      "current_bbox": [450, 280, 45, 140],
+      "trajectory": [
+        [454, 278],
+        [452, 279],
+        [450, 280]
+      ],
+      "velocity": [-1.2, 0.8],
+      "confidence": 0.92
+    }
+  ],
+  "statistics": {
+    "total_active_tracks": 3,
+    "total_completed_tracks": 142,
+    "average_track_duration_seconds": 12.5
+  }
+}
