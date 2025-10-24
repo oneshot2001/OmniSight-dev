@@ -6,7 +6,7 @@
 set -e  # Exit on error
 
 # Configuration
-VERSION="0.2.1"
+VERSION="0.2.2"
 APP_NAME="omnisight"
 FRIENDLY_NAME="OMNISIGHT - Precognitive Security"
 PACKAGE_NAME="OMNISIGHT_-_Precognitive_Security_${VERSION//./_}_aarch64.eap"
@@ -71,9 +71,10 @@ LAUNCHER_EOF
 
 chmod +x "$PACKAGE_DIR/omnisight"
 
-# Copy manifest
-echo "Creating manifest..."
+# Copy manifest and package.conf
+echo "Creating manifest and package.conf..."
 cp "$SCRIPT_DIR/manifest-hybrid.json" "$PACKAGE_DIR/manifest.json"
+cp "$SCRIPT_DIR/package-hybrid.conf" "$PACKAGE_DIR/package.conf"
 
 # Copy LICENSE (create minimal if not exists)
 echo "Copying LICENSE..."
