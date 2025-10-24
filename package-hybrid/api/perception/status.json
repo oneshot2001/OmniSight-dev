@@ -1,0 +1,22 @@
+{
+  "module": "perception",
+  "status": "running",
+  "mode": "stub",
+  "timestamp": "2025-10-24T12:00:00Z",
+  "performance": {
+    "fps": 10.2,
+    "latency_ms": 18,
+    "dropped_frames": 0
+  },
+  "statistics": {
+    "frames_processed": 15420,
+    "detections_total": 1542,
+    "tracks_active": 3,
+    "uptime_seconds": 3600
+  },
+  "dlpu": {
+    "enabled": false,
+    "model": "stub_detector_v1",
+    "inference_time_ms": 0
+  }
+}

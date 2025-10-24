@@ -5,10 +5,17 @@
       "appName": "omnisight",
       "friendlyName": "OMNISIGHT - Precognitive Security",
       "vendor": "OMNISIGHT",
-      "version": "0.2.3",
+      "vendorUrl": "https://github.com/oneshot2001/OmniSight-dev",
+      "version": "0.2.0",
+      "appId": 1001,
       "embeddedSdkVersion": "3.0",
+      "user": {
+        "username": "sdk",
+        "group": "sdk"
+      },
+      "architecture": "aarch64",
       "runMode": "respawn",
-      "architecture": "aarch64"
+      "runOptions": ""
     },
     "configuration": {
       "settingPage": "index.html",
@@ -19,6 +26,12 @@
           "access": "admin"
         }
       ]
+    },
+    "resources": {
+      "memory": {
+        "ram": 128,
+        "ramMax": 256
+      }
     }
   }
 }

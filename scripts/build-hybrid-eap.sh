@@ -1,12 +1,13 @@
 #!/bin/bash
-# OMNISIGHT Hybrid API ACAP Package Builder (v0.2.1)
+# OMNISIGHT Hybrid API ACAP Package Builder (v0.2.3)
 # Creates lightweight .eap package using Python http.server (no dependencies)
 # NO DOCKER REQUIRED - Builds directly on macOS/Linux
+# v0.2.3: Fixed Python path detection for ARTPEC-9 compatibility
 
 set -e  # Exit on error
 
 # Configuration
-VERSION="0.2.2"
+VERSION="0.2.3"
 APP_NAME="omnisight"
 FRIENDLY_NAME="OMNISIGHT - Precognitive Security"
 PACKAGE_NAME="OMNISIGHT_-_Precognitive_Security_${VERSION//./_}_aarch64.eap"
@@ -51,11 +52,12 @@ echo "Copying hybrid server..."
 cp "$PROJECT_ROOT/app/hybrid_server.py" "$PACKAGE_DIR/"
 
 # Create launcher script
-echo "Creating launcher script..."
+echo "Creating launcher script with Python path detection..."
 cat > "$PACKAGE_DIR/omnisight" << 'LAUNCHER_EOF'
 #!/bin/sh
-# OMNISIGHT Hybrid API Server Launcher
+# OMNISIGHT Hybrid API Server Launcher v0.2.3
 # Uses built-in Python http.server - NO DEPENDENCIES REQUIRED
+# Detects Python path for ARTPEC-8 and ARTPEC-9 compatibility
 
 # Set environment variables
 export OMNISIGHT_HTML_DIR="/usr/local/packages/omnisight/html"
@@ -65,8 +67,52 @@ export PORT=8080
 # Change to package directory
 cd /usr/local/packages/omnisight
 
+# Detect Python executable
+# Try multiple paths for compatibility across ARTPEC versions
+PYTHON=""
+
+# Common Python paths to check (in order of preference)
+PYTHON_PATHS="
+/usr/bin/python3
+/usr/bin/python
+python3
+python
+"
+
+# Find first available Python
+for py_path in $PYTHON_PATHS; do
+    if command -v "$py_path" >/dev/null 2>&1; then
+        PYTHON="$py_path"
+        echo "Found Python: $PYTHON" >&2
+        break
+    fi
+done
+
+# Fallback: Check if Python exists without full path
+if [ -z "$PYTHON" ]; then
+    if [ -x "/usr/bin/python3" ]; then
+        PYTHON="/usr/bin/python3"
+        echo "Using fallback: $PYTHON" >&2
+    elif [ -x "/usr/bin/python" ]; then
+        PYTHON="/usr/bin/python"
+        echo "Using fallback: $PYTHON" >&2
+    fi
+fi
+
+# Error if no Python found
+if [ -z "$PYTHON" ]; then
+    echo "ERROR: No Python interpreter found!" >&2
+    echo "Checked paths:" >&2
+    echo "$PYTHON_PATHS" >&2
+    exit 127
+fi
+
+# Verify Python version
+PYTHON_VERSION=$("$PYTHON" --version 2>&1)
+echo "Starting OMNISIGHT with: $PYTHON_VERSION" >&2
+
 # Start hybrid server
-exec python3 hybrid_server.py
+exec "$PYTHON" hybrid_server.py
 LAUNCHER_EOF
 
 chmod +x "$PACKAGE_DIR/omnisight"

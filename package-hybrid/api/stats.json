@@ -1,0 +1,33 @@
+{
+  "uptime_seconds": 86400,
+  "timestamp": "2025-10-24T12:00:00Z",
+  "memory": {
+    "used_mb": 128,
+    "allocated_mb": 256,
+    "usage_percent": 50.0
+  },
+  "cpu": {
+    "usage_percent": 35.2,
+    "cores": 4
+  },
+  "modules": {
+    "perception": {
+      "status": "running",
+      "fps": 10.2,
+      "detections_total": 1542,
+      "tracks_active": 3
+    },
+    "timeline": {
+      "status": "running",
+      "active_predictions": 3,
+      "futures_generated": 847,
+      "accuracy_percent": 78.5
+    },
+    "swarm": {
+      "status": "running",
+      "connected_cameras": 3,
+      "sync_latency_ms": 45,
+      "messages_sent": 2891
+    }
+  }
+}

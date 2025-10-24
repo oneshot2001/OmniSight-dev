@@ -1,0 +1,30 @@
+#!/bin/sh
+# OMNISIGHT Phase 2 - Flask API Server Launcher
+
+echo "OMNISIGHT: Starting Flask API Server (Phase 2)..."
+
+# Set environment variables
+export OMNISIGHT_HTML_DIR="/usr/local/packages/omnisight/html"
+export PYTHONPATH="/usr/local/packages/omnisight:$PYTHONPATH"
+export PORT=8080
+
+# Change to app directory
+cd /usr/local/packages/omnisight/app
+
+# Install dependencies on first run
+if [ ! -f /tmp/omnisight-deps-installed ]; then
+    echo "OMNISIGHT: Installing Flask dependencies..."
+    pip3 install --no-cache-dir Flask==3.0.0 Flask-CORS==4.0.0 Werkzeug==3.0.1 || {
+        echo "ERROR: Failed to install dependencies"
+        exit 1
+    }
+    touch /tmp/omnisight-deps-installed
+    echo "OMNISIGHT: Dependencies installed successfully"
+fi
+
+# Start Flask server
+echo "OMNISIGHT: Flask API server starting on port $PORT..."
+echo "OMNISIGHT: Dashboard: https://<camera-ip>/local/omnisight/"
+echo "OMNISIGHT: API: https://<camera-ip>/local/omnisight/api/"
+
+exec python3 server.py

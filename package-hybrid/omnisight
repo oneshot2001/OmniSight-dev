@@ -1,0 +1,59 @@
+#!/bin/sh
+# OMNISIGHT Hybrid API Server Launcher v0.2.3
+# Uses built-in Python http.server - NO DEPENDENCIES REQUIRED
+# Detects Python path for ARTPEC-8 and ARTPEC-9 compatibility
+
+# Set environment variables
+export OMNISIGHT_HTML_DIR="/usr/local/packages/omnisight/html"
+export OMNISIGHT_API_DIR="/usr/local/packages/omnisight/api"
+export PORT=8080
+
+# Change to package directory
+cd /usr/local/packages/omnisight
+
+# Detect Python executable
+# Try multiple paths for compatibility across ARTPEC versions
+PYTHON=""
+
+# Common Python paths to check (in order of preference)
+PYTHON_PATHS="
+/usr/bin/python3
+/usr/bin/python
+python3
+python
+"
+
+# Find first available Python
+for py_path in $PYTHON_PATHS; do
+    if command -v "$py_path" >/dev/null 2>&1; then
+        PYTHON="$py_path"
+        echo "Found Python: $PYTHON" >&2
+        break
+    fi
+done
+
+# Fallback: Check if Python exists without full path
+if [ -z "$PYTHON" ]; then
+    if [ -x "/usr/bin/python3" ]; then
+        PYTHON="/usr/bin/python3"
+        echo "Using fallback: $PYTHON" >&2
+    elif [ -x "/usr/bin/python" ]; then
+        PYTHON="/usr/bin/python"
+        echo "Using fallback: $PYTHON" >&2
+    fi
+fi
+
+# Error if no Python found
+if [ -z "$PYTHON" ]; then
+    echo "ERROR: No Python interpreter found!" >&2
+    echo "Checked paths:" >&2
+    echo "$PYTHON_PATHS" >&2
+    exit 127
+fi
+
+# Verify Python version
+PYTHON_VERSION=$("$PYTHON" --version 2>&1)
+echo "Starting OMNISIGHT with: $PYTHON_VERSION" >&2
+
+# Start hybrid server
+exec "$PYTHON" hybrid_server.py
