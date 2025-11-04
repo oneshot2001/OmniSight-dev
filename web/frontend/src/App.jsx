@@ -17,6 +17,7 @@ function App() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [systemStatus, setSystemStatus] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
 
   const api = new OmnisightAPI('http://localhost:8080');
 
@@ -27,9 +28,11 @@ function App() {
         const status = await api.getStatus();
         setSystemStatus(status);
         setIsConnected(true);
+        setDemoMode(api.isDemoMode());
       } catch (error) {
         console.error('Failed to fetch status:', error);
         setIsConnected(false);
+        setDemoMode(true);
       }
     };
 
@@ -71,6 +74,11 @@ function App() {
           <span className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`}>
             {isConnected ? '● Connected' : '○ Disconnected'}
           </span>
+          {demoMode && (
+            <span className="status-item demo-badge">
+              🎬 DEMO MODE
+            </span>
+          )}
           {systemStatus && (
             <>
               <span className="status-item">
@@ -134,7 +142,7 @@ function App() {
 
       {/* Footer */}
       <footer className="app-footer">
-        <span>OMNISIGHT v1.0.0</span>
+        <span>OMNISIGHT v0.5.1 {demoMode ? '(Demo Mode)' : ''}</span>
         <span>Timeline Threading™ • Swarm Intelligence • Privacy-Preserving</span>
         <span>Camera ID: {systemStatus?.camera_id || 'N/A'}</span>
       </footer>

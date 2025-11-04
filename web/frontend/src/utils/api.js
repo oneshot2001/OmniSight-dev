@@ -3,7 +3,10 @@
  * Handles communication with backend REST API (Phase 2)
  *
  * Enhanced for Flask/Python backend with Phase 2 endpoint structure
+ * Includes demo mode fallback when API is unavailable
  */
+
+import * as mockData from './mockData.js';
 
 export class OmnisightAPI {
   constructor(baseUrl = 'http://localhost:8080') {
@@ -11,9 +14,36 @@ export class OmnisightAPI {
     this.wsUrl = 'ws://localhost:8081';
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
+    this.demoMode = false;
+    this.checkDemoMode();
+  }
+
+  /**
+   * Check if API is available, enable demo mode if not
+   */
+  async checkDemoMode() {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+      const response = await fetch(`${this.baseUrl}/api/health`, {
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      this.demoMode = !response.ok;
+    } catch (error) {
+      console.log('API unavailable, enabling demo mode');
+      this.demoMode = true;
+    }
   }
 
   async request(endpoint, options = {}) {
+    // If demo mode, return mock data
+    if (this.demoMode) {
+      return this.getMockData(endpoint);
+    }
+
     const url = `${this.baseUrl}${endpoint}`;
 
     try {
@@ -31,9 +61,49 @@ export class OmnisightAPI {
 
       return await response.json();
     } catch (error) {
-      console.error(`API request failed: ${endpoint}`, error);
-      throw error;
+      console.error(`API request failed: ${endpoint}, switching to demo mode`, error);
+      this.demoMode = true;
+      return this.getMockData(endpoint);
     }
+  }
+
+  /**
+   * Get mock data based on endpoint
+   */
+  getMockData(endpoint) {
+    const mockResponses = {
+      '/api/status': mockData.mockSystemStatus,
+      '/api/health': { status: 'demo' },
+      '/api/stats': mockData.mockSystemStatus,
+      '/api/perception/status': mockData.mockSystemStatus.modules.perception,
+      '/api/perception/detections': mockData.mockDetections,
+      '/api/timeline/predictions': mockData.mockTimelinePredictions,
+      '/api/timeline/history': { events: [] },
+      '/api/swarm/network': mockData.mockSwarmNetwork,
+      '/api/swarm/cameras': mockData.mockSwarmNetwork.cameras,
+      '/api/events': mockData.mockEvents,
+      '/api/config': mockData.mockConfig,
+      '/api/heatmap': mockData.mockThreatHeatmap,
+      '/api/tracks': mockData.mockDetections.detections,
+      '/api/timelines': mockData.mockTimelinePredictions,
+      '/api/interventions': [],
+      '/api/cameras': mockData.mockSwarmNetwork.cameras,
+      '/api/statistics': mockData.mockSystemStatus
+    };
+
+    // Check if endpoint starts with any of our mock endpoints
+    for (const [key, value] of Object.entries(mockResponses)) {
+      if (endpoint.startsWith(key)) {
+        return Promise.resolve(value);
+      }
+    }
+
+    // Default response
+    return Promise.resolve({ status: 'demo', data: null });
+  }
+
+  isDemoMode() {
+    return this.demoMode;
   }
 
   // ========================================================================

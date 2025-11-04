@@ -82,6 +82,15 @@ body {
   color: var(--danger-color);
 }
 
+.demo-badge {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: var(--warning-color) !important;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  border: 1px solid var(--warning-color);
+}
+
 .status-item {
   font-size: 0.9rem;
   padding: 0.25rem 0.75rem;

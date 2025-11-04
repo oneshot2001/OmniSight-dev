@@ -1,0 +1,101 @@
+.event-monitor {
+  padding: 20px;
+}
+
+.event-monitor h2 {
+  margin-bottom: 20px;
+  color: #00ff00;
+}
+
+.event-filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.event-filters select,
+.event-filters input {
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #00ff00;
+  color: #00ff00;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+}
+
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.event-item {
+  background: rgba(0, 20, 0, 0.4);
+  border: 1px solid #00ff00;
+  border-radius: 8px;
+  padding: 15px;
+  transition: all 0.3s;
+}
+
+.event-item:hover {
+  background: rgba(0, 40, 0, 0.6);
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+}
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.event-type {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.event-type.high {
+  color: #ff3333;
+}
+
+.event-type.medium {
+  color: #ffaa00;
+}
+
+.event-type.low {
+  color: #00ff00;
+}
+
+.event-timestamp {
+  color: #00aa00;
+  font-size: 0.9em;
+}
+
+.event-details {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 255, 0, 0.3);
+}
+
+.event-details p {
+  margin: 5px 0;
+  font-size: 0.95em;
+}
+
+.event-confidence {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(0, 255, 0, 0.2);
+  border-radius: 4px;
+  margin-left: 10px;
+}
+
+.no-events {
+  text-align: center;
+  padding: 40px;
+  color: #00aa00;
+  font-style: italic;
+}
