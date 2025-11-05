@@ -132,7 +132,7 @@ static void event_handler(struct mg_connection *c, int ev, void *ev_data) {
         mg_printf(c, "Access-Control-Allow-Origin: *\r\n");
 
         // Handle OPTIONS
-        if (mg_vcmp(&hm->method, "OPTIONS") == 0) {
+        if (mg_strcmp(hm->method, mg_str("OPTIONS")) == 0) {
             mg_http_reply(c, 204, "Access-Control-Allow-Origin: *\r\n", "");
             return;
         }
@@ -205,11 +205,11 @@ static void handle_api_status(struct mg_connection *c) {
         "}"
         "}",
         (unsigned long)(stats.uptime_ms / 1000),
-        stats.perception_stats.fps,
-        stats.perception_stats.avg_latency_ms,
-        stats.perception_stats.fps,
-        stats.perception_stats.detections_total,
-        stats.timeline_stats.timelines_generated
+        stats.perception_stats.avg_fps,
+        stats.perception_stats.avg_inference_ms,
+        stats.perception_stats.avg_fps,
+        stats.perception_stats.tracked_objects,
+        stats.timeline_stats.active_timelines
     );
 
     send_json(c, 200, json);
@@ -233,7 +233,7 @@ static void handle_api_stats(struct mg_connection *c) {
         "\"fps\":%.1f"
         "}",
         (unsigned long)(stats.uptime_ms / 1000),
-        stats.perception_stats.fps
+        stats.perception_stats.avg_fps
     );
 
     send_json(c, 200, json);
@@ -256,9 +256,9 @@ static void handle_perception_status(struct mg_connection *c) {
         "\"detections_count\":%u,"
         "\"inference_time_ms\":%.1f"
         "}",
-        stats.perception_stats.fps,
-        stats.perception_stats.active_tracks,
-        stats.perception_stats.avg_latency_ms
+        stats.perception_stats.avg_fps,
+        stats.perception_stats.tracked_objects,
+        stats.perception_stats.avg_inference_ms
     );
 
     send_json(c, 200, json);
@@ -275,8 +275,8 @@ static void handle_perception_detections(struct mg_connection *c) {
     TrackedObject objects[50];
     uint32_t count = omnisight_get_tracked_objects(g_server->core, objects, 50);
 
-    // Build JSON
-    struct mg_str json = mg_str_n("{\"detections\":[", 16);
+    // Build JSON using simple string concatenation
+    char* json = mg_mprintf("{\"detections\":[");
 
     for (uint32_t i = 0; i < count; i++) {
         const TrackedObject* obj = &objects[i];
@@ -299,19 +299,14 @@ static void handle_perception_detections(struct mg_connection *c) {
             obj->threat_score
         );
 
-        char* new_json = mg_mprintf("%.*s%s", (int)json.len, json.ptr, obj_json);
-        if (json.ptr != (char*)"{\"detections\":[") {
-            free((void*)json.ptr);
-        }
+        char* new_json = mg_mprintf("%s%s", json, obj_json);
+        free(json);
         free(obj_json);
-        json.ptr = new_json;
-        json.len = strlen(new_json);
+        json = new_json;
     }
 
-    char* final_json = mg_mprintf("%.*s]}", (int)json.len, json.ptr);
-    if (json.ptr != (char*)"{\"detections\":[") {
-        free((void*)json.ptr);
-    }
+    char* final_json = mg_mprintf("%s]}", json);
+    free(json);
 
     send_json(c, 200, final_json);
     free(final_json);
@@ -327,11 +322,12 @@ static void handle_timeline_predictions(struct mg_connection *c) {
     Timeline timelines[5];
     uint32_t count = omnisight_get_timelines(g_server->core, timelines, 5);
 
-    // Build JSON
-    struct mg_str json = mg_str_n("{\"predictions\":[", 17);
+    // Build JSON using simple string concatenation
+    char* json = mg_mprintf("{\"predictions\":[");
 
     for (uint32_t i = 0; i < count; i++) {
         const Timeline* tl = &timelines[i];
+        (void)tl; // Unused for now
 
         char* tl_json = mg_mprintf(
             "%s{"
@@ -345,19 +341,14 @@ static void handle_timeline_predictions(struct mg_connection *c) {
             0.5f + (i * 0.1f)  // Placeholder probabilities
         );
 
-        char* new_json = mg_mprintf("%.*s%s", (int)json.len, json.ptr, tl_json);
-        if (json.ptr != (char*)"{\"predictions\":[") {
-            free((void*)json.ptr);
-        }
+        char* new_json = mg_mprintf("%s%s", json, tl_json);
+        free(json);
         free(tl_json);
-        json.ptr = new_json;
-        json.len = strlen(new_json);
+        json = new_json;
     }
 
-    char* final_json = mg_mprintf("%.*s]}", (int)json.len, json.ptr);
-    if (json.ptr != (char*)"{\"predictions\":[") {
-        free((void*)json.ptr);
-    }
+    char* final_json = mg_mprintf("%s]}", json);
+    free(json);
 
     send_json(c, 200, final_json);
     free(final_json);

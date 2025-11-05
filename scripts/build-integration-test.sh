@@ -35,11 +35,8 @@ gcc -Wall -Wextra -O2 \
     "$PROJECT_ROOT/src/http/http_server_simple.c" \
     "$PROJECT_ROOT/src/http/mongoose.c" \
     "$PROJECT_ROOT/src/omnisight_core.c" \
-    "$PROJECT_ROOT/src/perception/perception.c" \
     "$PROJECT_ROOT/src/perception/perception_stub.c" \
-    "$PROJECT_ROOT/src/timeline/timeline.c" \
     "$PROJECT_ROOT/src/timeline/timeline_stub.c" \
-    "$PROJECT_ROOT/src/swarm/swarm.c" \
     "$PROJECT_ROOT/src/swarm/swarm_stub.c" \
     -lpthread -lm
 

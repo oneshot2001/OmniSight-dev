@@ -54,11 +54,17 @@ int main(int argc, char* argv[]) {
 
     printf("Initializing OMNISIGHT core...\n");
 
-    // Create configuration
+    // Create configuration with correct field names
     OmnisightConfig config = {
-        .perception_enabled = true,
-        .timeline_enabled = true,
-        .swarm_enabled = true
+        .camera_id = 1,
+        .camera_name = "Test Camera",
+        .location = "Local Test",
+        .enable_perception = true,
+        .enable_timeline = true,
+        .enable_swarm = true,
+        .auto_start = true,
+        .update_interval_ms = 100,
+        .verbose_logging = false
     };
 
     // Initialize core
