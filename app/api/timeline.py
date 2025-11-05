@@ -3,8 +3,7 @@ Timeline API Blueprint
 Handles Timeline Threading predictions and history
 """
 
-from flask import Blueprint, jsonify
-from datetime import datetime
+from flask import Blueprint, jsonify, current_app
 
 timeline_bp = Blueprint('timeline', __name__)
 
@@ -13,6 +12,53 @@ timeline_bp = Blueprint('timeline', __name__)
 def get_predictions():
   """
   Returns active timeline predictions with probable future events
+
+  Returns:
+    JSON with active timeline count and prediction details
+  """
+  ipc = current_app.config['IPC_CLIENT']
+  data = ipc.get_timelines()
+
+  if not data:
+    return jsonify({
+      "error": "Timeline predictions not available",
+      "message": "No timeline data from C core"
+    }), 503
+
+  return jsonify(data)
+
+
+@timeline_bp.route('/status', methods=['GET'])
+def get_timeline_status():
+  """
+  Returns timeline module status and metrics
+
+  Returns:
+    JSON with timeline statistics
+  """
+  ipc = current_app.config['IPC_CLIENT']
+  stats = ipc.get_stats()
+
+  if not stats:
+    return jsonify({
+      "error": "Stats not available"
+    }), 503
+
+  timeline_stats = stats.get('timeline', {})
+  return jsonify({
+    "enabled": True,
+    "active_timelines": timeline_stats.get('active_timelines', 0),
+    "events_predicted": timeline_stats.get('events_predicted', 0),
+    "interventions": timeline_stats.get('interventions', 0),
+    "prediction_ms": timeline_stats.get('prediction_ms', 0),
+    "module": "timeline"
+  })
+
+
+@timeline_bp.route('/predictions_legacy', methods=['GET'])
+def get_predictions_legacy():
+  """
+  Legacy endpoint with hardcoded format for backward compatibility
 
   Returns:
     JSON with active timeline count and prediction details

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.5",
+  "acapPackageConf": {
+    "setup": {
+      "appName": "omnisightv2",
+      "friendlyName": "OMNISIGHT v2",
+      "vendor": "OMNISIGHT",
+      "vendorUrl": "https://github.com/oneshot2001/OmniSight-dev",
+      "version": "0.5.0",
+      "embeddedSdkVersion": "3.0",
+      "runMode": "never",
+      "architecture": "aarch64"
+    },
+    "configuration": {
+      "settingPage": "index.html"
+    }
+  }
+}

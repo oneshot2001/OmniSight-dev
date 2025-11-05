@@ -1,0 +1,26 @@
+#!/bin/sh
+# OMNISIGHT v0.6.1 Entry Point
+# Starts Flask API server on port 8080
+
+echo "Starting OMNISIGHT Flask API Server..."
+
+# Find Python 3 - AXIS OS typically has it at /usr/bin/python or /usr/bin/python3
+PYTHON=""
+if [ -x "/usr/bin/python3" ]; then
+    PYTHON="/usr/bin/python3"
+elif [ -x "/usr/bin/python" ]; then
+    # Check if it's Python 3
+    if /usr/bin/python --version 2>&1 | grep -q "Python 3"; then
+        PYTHON="/usr/bin/python"
+    fi
+fi
+
+if [ -z "$PYTHON" ]; then
+    echo "ERROR: Python 3 not found!"
+    echo "Checked: /usr/bin/python3, /usr/bin/python"
+    exit 1
+fi
+
+echo "Using Python: $PYTHON"
+cd /usr/local/packages/omnisightv2
+exec $PYTHON app/server.py

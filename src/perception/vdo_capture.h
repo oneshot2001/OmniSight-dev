@@ -1,9 +1,12 @@
 /**
  * @file vdo_capture.h
- * @brief VDO (Video Device Object) capture module for OMNISIGHT
+ * @brief OMNISIGHT VDO Video Capture Module
  *
- * Handles video stream capture from Axis camera using VDO API
- * Optimized for ARTPEC-8 hardware acceleration
+ * Handles video stream capture from Axis camera using VDO API.
+ * Provides YUV frames for Larod ML inference.
+ *
+ * Copyright (C) 2025 OMNISIGHT
+ * Based on Axis ACAP Native SDK examples
  */
 
 #ifndef OMNISIGHT_VDO_CAPTURE_H
@@ -11,126 +14,166 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <pthread.h>
+
+#include <glib.h>
+#include <vdo-stream.h>
+#include <vdo-types.h>
+#include <vdo-frame.h>
+#include <vdo-buffer.h>
+#include <vdo-error.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+// Forward declaration
 typedef struct VdoCapture VdoCapture;
-
-/**
- * Video format specification
- */
-typedef enum {
-    VDO_FORMAT_YUV420,
-    VDO_FORMAT_NV12,
-    VDO_FORMAT_RGB,
-    VDO_FORMAT_BGR,
-} VdoFormat;
-
-/**
- * Frame buffer structure
- */
-typedef struct {
-    uint8_t* data;           // Frame data
-    uint32_t width;          // Frame width
-    uint32_t height;         // Frame height
-    uint32_t stride;         // Row stride in bytes
-    VdoFormat format;        // Pixel format
-    uint64_t timestamp_ms;   // Capture timestamp
-    uint32_t sequence;       // Frame sequence number
-    void* vdo_buffer;        // Internal VDO buffer handle
-} VdoFrame;
 
 /**
  * VDO capture configuration
  */
 typedef struct {
-    uint32_t width;          // Desired frame width (0 = use camera default)
-    uint32_t height;         // Desired frame height (0 = use camera default)
-    uint32_t framerate;      // Target framerate (0 = use camera default)
-    VdoFormat format;        // Output pixel format
-    uint32_t buffer_count;   // Number of buffers in pool
-    bool use_hardware_accel; // Use hardware color conversion
-    uint32_t channel;        // VDO channel number
+    unsigned int channel;        // Input channel (1 = primary sensor)
+    unsigned int width;          // Requested frame width
+    unsigned int height;         // Requested frame height
+    double framerate;            // Target framerate (fps)
+    VdoFormat format;            // Video format (VDO_FORMAT_YUV recommended)
+    unsigned int buffer_count;   // Number of buffers (2-5)
+    bool dynamic_framerate;      // Allow framerate adjustment
 } VdoCaptureConfig;
 
 /**
- * Frame callback function
+ * Frame metadata from VDO
  */
-typedef void (*VdoFrameCallback)(const VdoFrame* frame, void* user_data);
+typedef struct {
+    unsigned int width;
+    unsigned int height;
+    unsigned int pitch;          // Bytes per row
+    VdoFormat format;
+    double framerate;
+    unsigned int rotation;       // Camera rotation (0, 90, 180, 270)
+    uint64_t timestamp_ms;
+} VdoFrameInfo;
 
 /**
- * Initialize VDO capture
+ * Initialize VDO capture with specified configuration
  *
- * @param config Capture configuration
- * @return VDO capture instance, NULL on failure
+ * @param config VDO capture configuration
+ * @return VdoCapture instance or NULL on failure
  */
 VdoCapture* vdo_capture_init(const VdoCaptureConfig* config);
 
 /**
- * Start video capture
+ * Start VDO stream capture
  *
- * @param capture VDO capture instance
- * @param callback Function called for each captured frame
- * @param user_data User data passed to callback
+ * Begins streaming video frames from the camera sensor.
+ *
+ * @param capture VdoCapture instance
  * @return true on success, false on failure
  */
-bool vdo_capture_start(
-    VdoCapture* capture,
-    VdoFrameCallback callback,
-    void* user_data
-);
+bool vdo_capture_start(VdoCapture* capture);
 
 /**
- * Stop video capture
+ * Stop VDO stream capture
  *
- * @param capture VDO capture instance
+ * @param capture VdoCapture instance
  */
 void vdo_capture_stop(VdoCapture* capture);
 
 /**
- * Release a frame buffer back to the pool
+ * Get next frame from VDO stream (blocking)
  *
- * Must be called after processing each frame
+ * Blocks until a frame is available or error occurs.
+ * Caller must release frame with vdo_capture_release_frame().
  *
- * @param capture VDO capture instance
- * @param frame Frame to release
+ * @param capture VdoCapture instance
+ * @param error Optional GError pointer for error details
+ * @return VdoBuffer containing frame data, NULL on error
  */
-void vdo_capture_release_frame(VdoCapture* capture, const VdoFrame* frame);
+VdoBuffer* vdo_capture_get_frame(VdoCapture* capture, GError** error);
 
 /**
- * Get the next frame (synchronous/blocking mode)
+ * Release frame buffer back to VDO
  *
- * Alternative to callback-based capture
+ * Must be called after processing each frame from vdo_capture_get_frame().
  *
- * @param capture VDO capture instance
- * @param timeout_ms Timeout in milliseconds (0 = infinite)
- * @return Frame pointer, NULL on timeout or error
+ * @param capture VdoCapture instance
+ * @param buffer VdoBuffer to release
+ * @return true on success, false on failure
  */
-VdoFrame* vdo_capture_get_frame(VdoCapture* capture, uint32_t timeout_ms);
+bool vdo_capture_release_frame(VdoCapture* capture, VdoBuffer* buffer);
 
 /**
- * Get capture statistics
+ * Flush all buffered frames
  *
- * @param capture VDO capture instance
- * @param frames_captured Total frames captured
- * @param frames_dropped Number of dropped frames
- * @param current_fps Current capture FPS
+ * Discards all frames in the VDO buffer queue.
+ * Useful after framerate changes or long processing delays.
+ *
+ * @param capture VdoCapture instance
  */
-void vdo_capture_get_stats(
-    VdoCapture* capture,
-    uint64_t* frames_captured,
-    uint64_t* frames_dropped,
-    float* current_fps
-);
+void vdo_capture_flush_frames(VdoCapture* capture);
 
 /**
- * Destroy VDO capture and free resources
+ * Get current frame metadata
  *
- * @param capture VDO capture instance
+ * @param capture VdoCapture instance
+ * @param info Output structure for frame metadata
+ * @return true on success, false on failure
+ */
+bool vdo_capture_get_frame_info(VdoCapture* capture, VdoFrameInfo* info);
+
+/**
+ * Update framerate dynamically
+ *
+ * Adjusts stream framerate based on processing time.
+ * Only works if dynamic_framerate was enabled in config.
+ *
+ * @param capture VdoCapture instance
+ * @param inference_time_ms Average inference time in milliseconds
+ * @return true if framerate was changed, false otherwise
+ */
+bool vdo_capture_update_framerate(VdoCapture* capture, unsigned int inference_time_ms);
+
+/**
+ * Get file descriptor for polling
+ *
+ * Can be used with poll() or select() for asynchronous frame availability.
+ *
+ * @param capture VdoCapture instance
+ * @return File descriptor or -1 on error
+ */
+int vdo_capture_get_fd(VdoCapture* capture);
+
+/**
+ * Get VDO stream object (for advanced usage)
+ *
+ * @param capture VdoCapture instance
+ * @return VdoStream pointer or NULL
+ */
+VdoStream* vdo_capture_get_stream(VdoCapture* capture);
+
+/**
+ * Destroy VDO capture instance and free resources
+ *
+ * Automatically stops stream if running.
+ *
+ * @param capture VdoCapture instance
  */
 void vdo_capture_destroy(VdoCapture* capture);
+
+/**
+ * Get statistics
+ *
+ * @param capture VdoCapture instance
+ * @param frames_captured Total frames captured
+ * @param frames_dropped Number of dropped frames
+ * @param avg_framerate Average framerate
+ */
+void vdo_capture_get_stats(VdoCapture* capture,
+                           uint64_t* frames_captured,
+                           uint64_t* frames_dropped,
+                           double* avg_framerate);
 
 #ifdef __cplusplus
 }

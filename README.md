@@ -4,6 +4,24 @@
 
 OMNISIGHT is a revolutionary edge AI application for Axis cameras that transforms passive security cameras into active guardians through precognitive intelligence, swarm collaboration, and natural language understanding.
 
+---
+
+## ⚠️ QUICK START - Camera Compatibility
+
+**IMPORTANT:** Not all Axis cameras have Python 3! Use the correct build for your camera:
+
+| Your Camera | Build Command | Package Version |
+|-------------|---------------|-----------------|
+| **P3285-LVE (ARTPEC-9)** | `./scripts/build-phase4-v3-native-eap.sh` | v0.4.2 (Native) ✅ |
+| **M4228-LVE (ARTPEC-8)** | `./scripts/build-phase4-v3-native-eap.sh` | v0.4.2 (Native) ✅ |
+| **Unknown/New Camera** | `./scripts/build-phase4-v3-native-eap.sh` | v0.4.2 (Native) ✅ |
+
+**Key Issue Resolved:** Phase 4 V3 (Native) works on ALL cameras without requiring Python.
+
+📖 **Full Details:** See [PHASE4_PYTHON_DEPENDENCY_ISSUE.md](PHASE4_PYTHON_DEPENDENCY_ISSUE.md)
+
+---
+
 ## Core Innovations
 
 ### Timeline Threading™

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OMNISIGHT v0.4.5</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 900px;
+      width: 100%;
+      padding: 40px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      color: #667eea;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    .version {
+      color: #764ba2;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    .status-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .status-card h3 {
+      font-size: 0.9em;
+      margin-bottom: 8px;
+      opacity: 0.9;
+    }
+    .status-card .value {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    .info-section {
+      background: #f5f7fa;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+    .info-section h2 {
+      color: #667eea;
+      margin-bottom: 12px;
+      font-size: 1.3em;
+    }
+    .feature-list {
+      list-style: none;
+    }
+    .feature-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+    .badge {
+      display: inline-block;
+      background: #764ba2;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 15px;
+      font-size: 0.85em;
+      margin-left: 8px;
+    }
+    .success {
+      background: #10b981;
+    }
+    footer {
+      text-align: center;
+      margin-top: 25px;
+      color: #666;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>OMNISIGHT</h1>
+      <p class="version">Version 0.4.5</p>
+      <p style="color: #666; margin-top: 8px;">Precognitive Security System</p>
+    </div>
+
+    <div class="status-grid">
+      <div class="status-card">
+        <h3>Web Interface</h3>
+        <div class="value">ONLINE</div>
+      </div>
+      <div class="status-card">
+        <h3>AppID</h3>
+        <div class="value">1007</div>
+      </div>
+      <div class="status-card">
+        <h3>Schema</h3>
+        <div class="value">1.8.0</div>
+      </div>
+      <div class="status-card">
+        <h3>Run Mode</h3>
+        <div class="value">STATIC</div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>✅ v0.4.5 Configuration</h2>
+      <ul class="feature-list">
+        <li>✓ <strong>NO package.conf</strong> - Only manifest.json <span class="badge success">CLEAN</span></li>
+        <li>✓ <strong>NO settingPage</strong> - Prevents auto-linking <span class="badge success">TEST</span></li>
+        <li>✓ <strong>httpConfig</strong> - transferCgi type <span class="badge success">ACTIVE</span></li>
+        <li>✓ <strong>NEW AppID (1007)</strong> - Fresh installation <span class="badge success">UNIQUE</span></li>
+      </ul>
+    </div>
+
+    <div class="info-section">
+      <h2>🔧 Technical Details</h2>
+      <ul class="feature-list">
+        <li><strong>Path:</strong> /local/omnisight/omnisight/</li>
+        <li><strong>Access:</strong> Admin only (Apache auth)</li>
+        <li><strong>Files:</strong> /usr/local/packages/omnisight/html/omnisight/</li>
+        <li><strong>Method:</strong> Apache transferCgi</li>
+      </ul>
+    </div>
+
+    <div class="info-section">
+      <h2>🎯 Key Changes in v0.4.5</h2>
+      <ul class="feature-list">
+        <li><strong>Removed package.conf:</strong> Eliminates conflicts with manifest.json</li>
+        <li><strong>Removed settingPage:</strong> Testing if this enables Open button</li>
+        <li><strong>httpConfig only:</strong> No reverse proxy configuration</li>
+        <li><strong>Path structure:</strong> html/omnisight/index.html for transferCgi</li>
+      </ul>
+    </div>
+
+    <footer>
+      <p>OMNISIGHT - Precognitive Security System</p>
+      <p>Phase 4 Development - v0.4.5 (manifest-only)</p>
+    </footer>
+  </div>
+</body>
+</html>

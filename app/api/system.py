@@ -3,9 +3,7 @@ System API Blueprint
 Handles system statistics and health endpoints
 """
 
-from flask import Blueprint, jsonify
-from datetime import datetime
-import os
+from flask import Blueprint, jsonify, current_app
 
 system_bp = Blueprint('system', __name__)
 
@@ -18,37 +16,16 @@ def get_stats():
   Returns:
     JSON with comprehensive system stats
   """
-  return jsonify({
-    "uptime_seconds": 86400,
-    "memory": {
-      "used_mb": 128,
-      "allocated_mb": 256,
-      "usage_percent": 50
-    },
-    "cpu": {
-      "usage_percent": 35,
-      "cores": 4
-    },
-    "modules": {
-      "perception": {
-        "status": "running",
-        "fps": 10.2,
-        "frames_processed": 367200
-      },
-      "timeline": {
-        "status": "running",
-        "active_predictions": 3,
-        "total_predictions": 1420
-      },
-      "swarm": {
-        "status": "running",
-        "connected_cameras": 3,
-        "messages_sent": 5234,
-        "messages_received": 4891
-      }
-    },
-    "timestamp": datetime.utcnow().isoformat() + "Z"
-  })
+  ipc = current_app.config['IPC_CLIENT']
+  data = ipc.get_stats()
+
+  if not data:
+    return jsonify({
+      "error": "Stats not available",
+      "message": "C core may not be running"
+    }), 503
+
+  return jsonify(data)
 
 
 @system_bp.route('/health', methods=['GET'])
@@ -57,10 +34,44 @@ def health_check():
   Health check endpoint for monitoring
 
   Returns:
-    JSON with health status
+    JSON with health status and IPC health
   """
+  ipc = current_app.config['IPC_CLIENT']
+  health = ipc.health_check()
+
+  # Determine overall status
+  if all(health.values()):
+    status = "healthy"
+    code = 200
+  elif health.get('c_core_running'):
+    status = "degraded"
+    code = 200
+  else:
+    status = "unhealthy"
+    code = 503
+
   return jsonify({
-    "status": "healthy",
+    "status": status,
     "version": "0.2.0",
-    "timestamp": datetime.utcnow().isoformat() + "Z"
-  })
+    "ipc": health
+  }), code
+
+
+@system_bp.route('/status', methods=['GET'])
+def get_status():
+  """
+  Returns C core status
+
+  Returns:
+    JSON with core status information
+  """
+  ipc = current_app.config['IPC_CLIENT']
+  data = ipc.get_status()
+
+  if not data:
+    return jsonify({
+      "error": "Status not available",
+      "message": "C core may not be running"
+    }), 503
+
+  return jsonify(data)

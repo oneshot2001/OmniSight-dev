@@ -3,8 +3,7 @@ Perception API Blueprint
 Handles object detection and tracking endpoints
 """
 
-from flask import Blueprint, jsonify
-from datetime import datetime
+from flask import Blueprint, jsonify, current_app
 
 perception_bp = Blueprint('perception', __name__)
 
@@ -17,13 +16,24 @@ def get_perception_status():
   Returns:
     JSON with enabled status, FPS, resolution, and object count
   """
+  ipc = current_app.config['IPC_CLIENT']
+  stats = ipc.get_stats()
+
+  if not stats:
+    return jsonify({
+      "error": "Stats not available",
+      "message": "C core may not be running"
+    }), 503
+
+  perception_stats = stats.get('perception', {})
   return jsonify({
     "enabled": True,
-    "fps": 10.2,
+    "fps": perception_stats.get('fps', 0),
     "resolution": "1920x1080",
-    "objects_tracked": 3,
-    "module": "perception",
-    "last_update": datetime.utcnow().isoformat() + "Z"
+    "objects_tracked": perception_stats.get('objects_tracked', 0),
+    "inference_ms": perception_stats.get('inference_ms', 0),
+    "dropped_frames": perception_stats.get('dropped_frames', 0),
+    "module": "perception"
   })
 
 
@@ -35,30 +45,33 @@ def get_detections():
   Returns:
     JSON with frame ID, timestamp, and list of detections
   """
-  return jsonify({
-    "frame_id": 12345,
-    "timestamp": datetime.utcnow().isoformat() + "Z",
-    "detections": [
-      {
-        "id": 1,
-        "type": "person",
-        "bbox": [100, 200, 50, 150],
-        "confidence": 0.95,
-        "track_id": "T001"
-      },
-      {
-        "id": 2,
-        "type": "vehicle",
-        "bbox": [400, 300, 120, 80],
-        "confidence": 0.87,
-        "track_id": "T002"
-      },
-      {
-        "id": 3,
-        "type": "person",
-        "bbox": [600, 250, 45, 140],
-        "confidence": 0.92,
-        "track_id": "T003"
-      }
-    ]
-  })
+  ipc = current_app.config['IPC_CLIENT']
+  data = ipc.get_detections()
+
+  if not data:
+    return jsonify({
+      "error": "Detections not available",
+      "message": "No detection data from C core"
+    }), 503
+
+  return jsonify(data)
+
+
+@perception_bp.route('/tracks', methods=['GET'])
+def get_tracks():
+  """
+  Returns currently tracked objects
+
+  Returns:
+    JSON with timestamp and list of tracked objects
+  """
+  ipc = current_app.config['IPC_CLIENT']
+  data = ipc.get_tracks()
+
+  if not data:
+    return jsonify({
+      "error": "Tracks not available",
+      "message": "No tracking data from C core"
+    }), 503
+
+  return jsonify(data)

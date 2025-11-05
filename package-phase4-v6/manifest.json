@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.8.0",
+  "acapPackageConf": {
+    "setup": {
+      "appName": "omnisight",
+      "friendlyName": "OMNISIGHT v0.4.6",
+      "vendor": "OMNISIGHT",
+      "vendorUrl": "https://github.com/oneshot2001/OmniSight-dev",
+      "embeddedSdkVersion": "3.0",
+      "version": "0.4.6",
+      "appId": 1008,
+      "runMode": "never",
+      "architecture": "aarch64"
+    }
+  },
+  "configuration": {
+    "httpConfig": [
+      {
+        "access": "admin",
+        "name": "omnisight",
+        "type": "transferCgi"
+      }
+    ]
+  }
+}

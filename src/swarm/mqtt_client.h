@@ -1,9 +1,12 @@
 /**
  * @file mqtt_client.h
- * @brief MQTT 5.0 client for Swarm Intelligence
+ * @brief OMNISIGHT MQTT 5.0 Client for Swarm Communication
  *
- * Lightweight MQTT client optimized for embedded systems.
- * Uses Eclipse Paho MQTT C library.
+ * Provides multi-camera communication for track sharing, event distribution,
+ * and federated learning via MQTT 5.0 protocol with Eclipse Mosquitto.
+ *
+ * Copyright (C) 2025 OMNISIGHT
+ * Based on Axis ACAP Native SDK message-broker example
  */
 
 #ifndef OMNISIGHT_MQTT_CLIENT_H
@@ -12,281 +15,315 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "../perception/perception.h"
+#include "../perception/tracking.h"
+#include "../timeline/timeline.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// ============================================================================
-// Forward Declarations
-// ============================================================================
-
+// Forward declaration
 typedef struct MqttClient MqttClient;
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-#define MQTT_MAX_TOPIC_LENGTH 256
-#define MQTT_MAX_PAYLOAD_SIZE 65536  // 64KB max message size
-
-// ============================================================================
-// Enums
-// ============================================================================
-
-/**
- * MQTT QoS level
- */
-typedef enum {
-    MQTT_QOS_AT_MOST_ONCE = 0,   // Fire and forget
-    MQTT_QOS_AT_LEAST_ONCE = 1,  // Guaranteed delivery, may duplicate
-    MQTT_QOS_EXACTLY_ONCE = 2    // Guaranteed exactly once (expensive)
-} MqttQoS;
-
-/**
- * Connection status
- */
-typedef enum {
-    MQTT_STATUS_DISCONNECTED,
-    MQTT_STATUS_CONNECTING,
-    MQTT_STATUS_CONNECTED,
-    MQTT_STATUS_DISCONNECTING,
-    MQTT_STATUS_ERROR
-} MqttStatus;
-
-// ============================================================================
-// Callbacks
-// ============================================================================
-
-/**
- * Message received callback
- *
- * @param topic Message topic
- * @param payload Message payload
- * @param payload_len Payload length
- * @param user_data User data passed to mqtt_client_init
- */
-typedef void (*MqttMessageCallback)(
-    const char* topic,
-    const uint8_t* payload,
-    uint32_t payload_len,
-    void* user_data
-);
-
-/**
- * Connection status callback
- *
- * @param status New connection status
- * @param user_data User data passed to mqtt_client_init
- */
-typedef void (*MqttStatusCallback)(
-    MqttStatus status,
-    void* user_data
-);
-
-// ============================================================================
-// Data Structures
-// ============================================================================
 
 /**
  * MQTT client configuration
  */
 typedef struct {
-    // Broker
-    const char* broker_address;   // MQTT broker address
-    uint16_t broker_port;         // MQTT broker port (default 1883)
-
-    // Client
-    const char* client_id;        // Unique client ID
-    const char* username;         // Username (optional)
-    const char* password;         // Password (optional)
-
-    // Connection
-    uint32_t keepalive_interval_s; // Keepalive interval (default 60s)
-    bool clean_session;           // Clean session flag
-    uint32_t connect_timeout_s;   // Connection timeout
-
-    // TLS/SSL (optional)
-    bool use_tls;                 // Enable TLS
-    const char* ca_cert_path;     // CA certificate path
-    const char* client_cert_path; // Client certificate path
-    const char* client_key_path;  // Client private key path
-
-    // Callbacks
-    MqttMessageCallback on_message;
-    MqttStatusCallback on_status;
-    void* user_data;              // User data for callbacks
-
-    // Quality of Service
-    MqttQoS default_qos;          // Default QoS for publish
-} MqttConfig;
+    const char* camera_id;          // Unique camera identifier (from Axis serial)
+    const char* broker_host;        // MQTT broker hostname/IP
+    int broker_port;                // MQTT broker port (default: 1883)
+    int keepalive_seconds;          // Keepalive interval (default: 60)
+    bool clean_session;             // Clean session flag (default: false)
+    const char* username;           // Optional authentication username
+    const char* password;           // Optional authentication password
+    bool use_tls;                   // Enable TLS/SSL (default: false)
+    const char* ca_cert_path;       // Path to CA certificate for TLS
+} MqttClientConfig;
 
 /**
- * MQTT client statistics
+ * Global position in world coordinates (meters)
  */
 typedef struct {
-    uint64_t messages_published;  // Total messages published
-    uint64_t messages_received;   // Total messages received
-    uint64_t bytes_sent;          // Total bytes sent
-    uint64_t bytes_received;      // Total bytes received
-    uint64_t connect_attempts;    // Connection attempts
-    uint64_t connection_errors;   // Connection errors
-    uint64_t publish_failures;    // Publish failures
-    float avg_latency_ms;         // Average round-trip latency
-} MqttStats;
+    float x;                        // X coordinate in world space (meters)
+    float y;                        // Y coordinate in world space (meters)
+    float z;                        // Z coordinate (elevation, optional)
+} GlobalPosition;
 
-// ============================================================================
-// Public API
-// ============================================================================
+/**
+ * Track message (published to swarm)
+ */
+typedef struct {
+    char camera_id[64];             // Source camera ID
+    uint32_t track_id;              // Track ID on source camera
+    GlobalPosition position;        // Global world position
+    float velocity_x;               // Velocity X component (m/s)
+    float velocity_y;               // Velocity Y component (m/s)
+    char object_class[32];          // Object class (person, vehicle, etc.)
+    float confidence;               // Detection confidence (0.0-1.0)
+    uint64_t timestamp_ms;          // Timestamp (milliseconds since epoch)
+    BehaviorFlags behaviors;        // Detected behaviors
+    float threat_score;             // Threat score (0.0-1.0)
+} TrackMessage;
+
+/**
+ * Event message (published to swarm)
+ */
+typedef struct {
+    char camera_id[64];             // Source camera ID
+    uint32_t event_id;              // Event ID on source camera
+    EventType event_type;           // Type of event
+    GlobalPosition position;        // Event location
+    uint32_t track_id;              // Associated track ID
+    float probability;              // Event probability (0.0-1.0)
+    EventSeverity severity;         // Event severity level
+    uint64_t predicted_time_ms;     // When event is predicted to occur
+    uint64_t timestamp_ms;          // Prediction timestamp
+} EventMessage;
+
+/**
+ * Model weights message (for federated learning)
+ */
+typedef struct {
+    char camera_id[64];             // Source camera ID
+    uint32_t version;               // Model version number
+    float* weights;                 // Weight array
+    size_t num_weights;             // Number of weights
+    uint64_t timestamp_ms;          // Update timestamp
+} ModelWeightsMessage;
+
+/**
+ * Consensus message (multi-camera event validation)
+ */
+typedef struct {
+    uint32_t event_id;              // Global event ID
+    char initiating_camera[64];     // Camera that detected the event
+    uint32_t num_confirming;        // Number of cameras confirming
+    char confirming_cameras[10][64]; // List of confirming cameras
+    float aggregated_confidence;    // Combined confidence
+    uint64_t timestamp_ms;          // Consensus timestamp
+} ConsensusMessage;
+
+/**
+ * Callback for receiving track updates from other cameras
+ *
+ * @param track Received track message
+ * @param user_data User-provided context pointer
+ */
+typedef void (*TrackReceivedCallback)(const TrackMessage* track, void* user_data);
+
+/**
+ * Callback for receiving event predictions from other cameras
+ *
+ * @param event Received event message
+ * @param user_data User-provided context pointer
+ */
+typedef void (*EventReceivedCallback)(const EventMessage* event, void* user_data);
+
+/**
+ * Callback for receiving model weight updates (federated learning)
+ *
+ * @param weights Received model weights
+ * @param user_data User-provided context pointer
+ */
+typedef void (*ModelWeightsReceivedCallback)(const ModelWeightsMessage* weights,
+                                             void* user_data);
+
+/**
+ * Callback for receiving consensus messages
+ *
+ * @param consensus Received consensus message
+ * @param user_data User-provided context pointer
+ */
+typedef void (*ConsensusReceivedCallback)(const ConsensusMessage* consensus,
+                                          void* user_data);
+
+/**
+ * Callback for connection status changes
+ *
+ * @param connected true if connected, false if disconnected
+ * @param user_data User-provided context pointer
+ */
+typedef void (*ConnectionStatusCallback)(bool connected, void* user_data);
 
 /**
  * Initialize MQTT client
  *
- * @param config MQTT configuration
- * @return Client handle, or NULL on error
- */
-MqttClient* mqtt_client_init(const MqttConfig* config);
-
-/**
- * Destroy MQTT client
+ * Creates MQTT client instance with specified configuration.
+ * Does not connect to broker (call mqtt_client_connect).
  *
- * @param client Client to destroy
+ * @param config Client configuration
+ * @return MqttClient instance or NULL on failure
  */
-void mqtt_client_destroy(MqttClient* client);
+MqttClient* mqtt_client_init(const MqttClientConfig* config);
 
 /**
  * Connect to MQTT broker
  *
- * @param client MQTT client
- * @return true on success, false on error
+ * Establishes connection to broker and subscribes to swarm topics.
+ * Async operation with automatic reconnection handling.
+ * Starts network loop thread for message processing.
+ *
+ * @param client MqttClient instance
+ * @return true on successful connection initiation, false on failure
  */
 bool mqtt_client_connect(MqttClient* client);
 
 /**
  * Disconnect from MQTT broker
  *
- * @param client MQTT client
+ * Gracefully disconnects from broker and stops network loop thread.
+ *
+ * @param client MqttClient instance
  */
 void mqtt_client_disconnect(MqttClient* client);
 
 /**
- * Check if connected
+ * Check if client is connected
  *
- * @param client MQTT client
- * @return true if connected, false otherwise
+ * @param client MqttClient instance
+ * @return true if connected to broker, false otherwise
  */
 bool mqtt_client_is_connected(const MqttClient* client);
 
 /**
- * Get connection status
+ * Set track received callback
  *
- * @param client MQTT client
- * @return Connection status
+ * @param client MqttClient instance
+ * @param callback Callback function
+ * @param user_data User-provided context pointer
  */
-MqttStatus mqtt_client_get_status(const MqttClient* client);
+void mqtt_client_set_track_callback(MqttClient* client,
+                                    TrackReceivedCallback callback,
+                                    void* user_data);
 
 /**
- * Subscribe to topic
+ * Set event received callback
  *
- * @param client MQTT client
- * @param topic Topic to subscribe (supports wildcards: +, #)
- * @param qos Quality of Service level
- * @return true on success, false on error
+ * @param client MqttClient instance
+ * @param callback Callback function
+ * @param user_data User-provided context pointer
  */
-bool mqtt_client_subscribe(
-    MqttClient* client,
-    const char* topic,
-    MqttQoS qos
-);
+void mqtt_client_set_event_callback(MqttClient* client,
+                                    EventReceivedCallback callback,
+                                    void* user_data);
 
 /**
- * Unsubscribe from topic
+ * Set model weights received callback
  *
- * @param client MQTT client
- * @param topic Topic to unsubscribe
- * @return true on success, false on error
+ * @param client MqttClient instance
+ * @param callback Callback function
+ * @param user_data User-provided context pointer
  */
-bool mqtt_client_unsubscribe(
-    MqttClient* client,
-    const char* topic
-);
+void mqtt_client_set_model_callback(MqttClient* client,
+                                    ModelWeightsReceivedCallback callback,
+                                    void* user_data);
 
 /**
- * Publish message
+ * Set consensus received callback
  *
- * @param client MQTT client
- * @param topic Topic to publish to
- * @param payload Message payload
- * @param payload_len Payload length
- * @param qos Quality of Service level
- * @param retain Retain flag
- * @return true on success, false on error
+ * @param client MqttClient instance
+ * @param callback Callback function
+ * @param user_data User-provided context pointer
  */
-bool mqtt_client_publish(
-    MqttClient* client,
-    const char* topic,
-    const uint8_t* payload,
-    uint32_t payload_len,
-    MqttQoS qos,
-    bool retain
-);
+void mqtt_client_set_consensus_callback(MqttClient* client,
+                                        ConsensusReceivedCallback callback,
+                                        void* user_data);
 
 /**
- * Publish string message
+ * Set connection status callback
  *
- * @param client MQTT client
- * @param topic Topic to publish to
- * @param message String message (null-terminated)
- * @param qos Quality of Service level
- * @param retain Retain flag
- * @return true on success, false on error
+ * @param client MqttClient instance
+ * @param callback Callback function
+ * @param user_data User-provided context pointer
  */
-bool mqtt_client_publish_string(
-    MqttClient* client,
-    const char* topic,
-    const char* message,
-    MqttQoS qos,
-    bool retain
-);
+void mqtt_client_set_connection_callback(MqttClient* client,
+                                         ConnectionStatusCallback callback,
+                                         void* user_data);
 
 /**
- * Process incoming messages
+ * Publish track update to swarm
  *
- * Should be called periodically to handle incoming messages.
- * Non-blocking.
+ * Publishes track state to omnisight/swarm/tracks/{camera_id}/{track_id}.
+ * Uses QoS 0 for real-time performance.
  *
- * @param client MQTT client
- * @param timeout_ms Timeout in milliseconds (0 = non-blocking)
- * @return Number of messages processed
+ * @param client MqttClient instance
+ * @param track Track message to publish
+ * @return true on successful publish, false on failure
  */
-uint32_t mqtt_client_process(MqttClient* client, uint32_t timeout_ms);
+bool mqtt_client_publish_track(MqttClient* client, const TrackMessage* track);
 
 /**
- * Get client statistics
+ * Publish event prediction to swarm
  *
- * @param client MQTT client
- * @param stats Output statistics
+ * Publishes event to omnisight/swarm/events/{camera_id}/{event_id}.
+ * Uses QoS 1 for reliable delivery.
+ *
+ * @param client MqttClient instance
+ * @param event Event message to publish
+ * @return true on successful publish, false on failure
  */
-void mqtt_client_get_stats(const MqttClient* client, MqttStats* stats);
+bool mqtt_client_publish_event(MqttClient* client, const EventMessage* event);
 
 /**
- * Set last will and testament
+ * Publish model weights update (federated learning)
  *
- * Message published when client disconnects unexpectedly.
+ * Publishes model weights to omnisight/swarm/models/{camera_id}/weights.
+ * Uses QoS 2 for exactly-once delivery.
  *
- * @param client MQTT client
- * @param topic Will topic
- * @param message Will message
- * @param qos Will QoS
- * @param retain Retain flag
- * @return true on success, false on error
+ * @param client MqttClient instance
+ * @param weights Model weights to publish
+ * @return true on successful publish, false on failure
  */
-bool mqtt_client_set_will(
-    MqttClient* client,
-    const char* topic,
-    const char* message,
-    MqttQoS qos,
-    bool retain
-);
+bool mqtt_client_publish_model_weights(MqttClient* client,
+                                       const ModelWeightsMessage* weights);
+
+/**
+ * Publish consensus vote
+ *
+ * Publishes consensus message to omnisight/swarm/consensus/{event_id}.
+ * Uses QoS 1 for reliable delivery.
+ *
+ * @param client MqttClient instance
+ * @param consensus Consensus message to publish
+ * @return true on successful publish, false on failure
+ */
+bool mqtt_client_publish_consensus(MqttClient* client,
+                                   const ConsensusMessage* consensus);
+
+/**
+ * Get MQTT client statistics
+ *
+ * @param client MqttClient instance
+ * @param messages_sent Total messages sent
+ * @param messages_received Total messages received
+ * @param bytes_sent Total bytes sent
+ * @param bytes_received Total bytes received
+ * @param reconnects Number of reconnection attempts
+ */
+void mqtt_client_get_stats(const MqttClient* client,
+                           uint64_t* messages_sent,
+                           uint64_t* messages_received,
+                           uint64_t* bytes_sent,
+                           uint64_t* bytes_received,
+                           uint32_t* reconnects);
+
+/**
+ * Get last error message
+ *
+ * @param client MqttClient instance
+ * @return Last error message or NULL if no error
+ */
+const char* mqtt_client_get_last_error(const MqttClient* client);
+
+/**
+ * Destroy MQTT client and free resources
+ *
+ * Automatically disconnects if still connected.
+ *
+ * @param client MqttClient instance
+ */
+void mqtt_client_destroy(MqttClient* client);
 
 #ifdef __cplusplus
 }

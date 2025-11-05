@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "mode": "native",
+  "version": "0.4.2",
+  "message": "Phase 4 V3 - Native HTTP server (no Python dependency)",
+  "python_available": false,
+  "server": "native"
+}

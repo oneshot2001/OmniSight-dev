@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OMNISIGHT Phase 4 V3</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #00ff88, #00d4ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle { color: #8899a6; margin-bottom: 30px; }
+    .status-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .stat-item {
+      background: rgba(255,255,255,0.03);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 3px solid #00ff88;
+    }
+    .stat-label { color: #8899a6; font-size: 14px; margin-bottom: 5px; }
+    .stat-value { font-size: 24px; font-weight: bold; color: #00ff88; }
+    .module-list { margin-top: 20px; }
+    .module {
+      background: rgba(0,255,136,0.1);
+      border: 1px solid #00ff88;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+    .module::before {
+      content: '✓';
+      color: #00ff88;
+      font-size: 20px;
+      margin-right: 10px;
+    }
+    .warning {
+      background: rgba(255,193,7,0.1);
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .warning::before {
+      content: '⚠️ ';
+    }
+    .features { margin-top: 20px; }
+    .feature {
+      background: rgba(255,255,255,0.03);
+      padding: 10px 15px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      border-left: 2px solid #00d4ff;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #8899a6;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OMNISIGHT</h1>
+    <div class="subtitle">Precognitive Security System - Phase 4 V3 (Native)</div>
+
+    <div class="status-card">
+      <h2>System Status</h2>
+      <div class="status-grid">
+        <div class="stat-item">
+          <div class="stat-label">Status</div>
+          <div class="stat-value">Active</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Mode</div>
+          <div class="stat-value">Phase 4 V3</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Version</div>
+          <div class="stat-value">0.4.2</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Server</div>
+          <div class="stat-value">Native</div>
+        </div>
+      </div>
+
+      <div class="warning">
+        <strong>Python Dependency Issue Resolved</strong><br>
+        P3285-LVE camera does not have Python 3 installed. This version uses native HTTP serving without Python dependencies.
+      </div>
+    </div>
+
+    <div class="status-card">
+      <h2>Active Modules</h2>
+      <div class="module-list">
+        <div class="module">Perception Engine - Object detection and tracking</div>
+        <div class="module">Timeline Threading™ - Predicting 3-5 probable futures</div>
+        <div class="module">Swarm Intelligence - Multi-camera coordination (stub)</div>
+      </div>
+    </div>
+
+    <div class="status-card">
+      <h2>Phase 4 Features (V3 Native)</h2>
+      <div class="features">
+        <div class="feature">✓ Native HTTP server (no Python dependency)</div>
+        <div class="feature">✓ Static file serving via Apache reverse proxy</div>
+        <div class="feature">✓ Compatible with ARTPEC-9 cameras</div>
+        <div class="feature">⚠️ Python Flask APIs disabled (pending native C implementation)</div>
+        <div class="feature">⚠️ Claude Flow coordinators disabled (Python required)</div>
+      </div>
+    </div>
+
+    <div class="status-card">
+      <h2>Technical Information</h2>
+      <p><strong>Issue:</strong> Phase 4 v0.4.1 failed because P3285-LVE doesn't have Python 3</p>
+      <p><strong>Error:</strong> <code>python3: not found</code></p>
+      <p><strong>Solution:</strong> V3 uses native HTTP server without Python dependencies</p>
+      <p><strong>Next Steps:</strong> Implement Phase 4 coordinators in native C (Phase 5)</p>
+    </div>
+
+    <div class="footer">
+      OMNISIGHT v0.4.2 | Development Build<br>
+      © 2024-2025 OMNISIGHT Project
+    </div>
+  </div>
+</body>
+</html>

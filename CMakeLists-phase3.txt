@@ -1,0 +1,275 @@
+# OMNISIGHT - Precognitive Security System
+# Phase 3 CMakeLists.txt - Hardware Integration Build
+# Enables VDO, Larod, and MQTT APIs for ARTPEC-8/9 cameras
+
+cmake_minimum_required(VERSION 3.16)
+project(OMNISIGHT VERSION 0.4.0 LANGUAGES C)
+
+# C Standard
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Build type
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Phase 3 Hardware Options
+option(ENABLE_HARDWARE_APIS "Enable hardware APIs (VDO, Larod, MQTT)" ON)
+option(ENABLE_VDO "Enable VDO video capture" ON)
+option(ENABLE_LAROD "Enable Larod ML inference" ON)
+option(ENABLE_MQTT "Enable MQTT swarm coordination" ON)
+option(BUILD_TESTING "Build test programs" OFF)
+option(BUILD_EXAMPLES "Build example programs" OFF)
+
+# Module options
+option(ENABLE_TIMELINE "Enable Timeline Threading module" ON)
+option(ENABLE_SWARM "Enable Swarm Intelligence module" ON)
+option(ENABLE_PERCEPTION "Enable Perception engine" ON)
+
+# Common include directories
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/perception
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/timeline
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/swarm
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ipc
+)
+
+# Find required packages
+find_package(Threads REQUIRED)
+
+# Hardware-specific packages (Phase 3)
+if(ENABLE_HARDWARE_APIS)
+  message(STATUS "Phase 3: Hardware APIs enabled")
+
+  # Find GLib (required for VDO and Larod)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GLIB REQUIRED glib-2.0)
+  include_directories(${GLIB_INCLUDE_DIRS})
+
+  # VDO package
+  if(ENABLE_VDO)
+    pkg_check_modules(VDO REQUIRED vdo)
+    include_directories(${VDO_INCLUDE_DIRS})
+    add_definitions(-DENABLE_VDO=1)
+  endif()
+
+  # Larod package
+  if(ENABLE_LAROD)
+    pkg_check_modules(LAROD REQUIRED larod)
+    include_directories(${LAROD_INCLUDE_DIRS})
+    add_definitions(-DENABLE_LAROD=1)
+  endif()
+
+  # MQTT package (mosquitto)
+  if(ENABLE_MQTT)
+    find_library(MOSQUITTO_LIB mosquitto)
+    if(MOSQUITTO_LIB)
+      add_definitions(-DENABLE_MQTT=1)
+    else()
+      message(WARNING "Mosquitto library not found, MQTT will be disabled")
+      set(ENABLE_MQTT OFF)
+    endif()
+  endif()
+
+  add_definitions(-DOMNISIGHT_HARDWARE_BUILD=1)
+else()
+  message(STATUS "Phase 1/2: Stub build (no hardware APIs)")
+  add_definitions(-DOMNISIGHT_STUB_BUILD=1)
+endif()
+
+# Perception Module
+if(ENABLE_PERCEPTION)
+  set(PERCEPTION_SOURCES
+    src/perception/perception.c
+  )
+
+  if(ENABLE_HARDWARE_APIS AND ENABLE_VDO AND ENABLE_LAROD)
+    # Hardware implementation
+    list(APPEND PERCEPTION_SOURCES
+      src/perception/vdo_capture.c
+      src/perception/larod_inference.c
+      src/perception/tracker.c
+    )
+    message(STATUS "Perception: Hardware implementation (VDO + Larod)")
+  else()
+    # Stub implementation
+    list(APPEND PERCEPTION_SOURCES
+      src/perception/perception_stub.c
+    )
+    message(STATUS "Perception: Stub implementation")
+  endif()
+
+  add_library(omnisight_perception STATIC ${PERCEPTION_SOURCES})
+
+  if(ENABLE_HARDWARE_APIS)
+    target_link_libraries(omnisight_perception
+      PUBLIC ${GLIB_LIBRARIES}
+      PUBLIC ${VDO_LIBRARIES}
+      PUBLIC ${LAROD_LIBRARIES}
+    )
+  endif()
+endif()
+
+# Timeline Module
+if(ENABLE_TIMELINE)
+  set(TIMELINE_SOURCES
+    src/timeline/timeline.c
+  )
+
+  if(ENABLE_HARDWARE_APIS)
+    # Hardware implementation
+    list(APPEND TIMELINE_SOURCES
+      src/timeline/trajectory_predictor.c
+      src/timeline/event_predictor.c
+    )
+    message(STATUS "Timeline: Hardware implementation")
+  else()
+    # Stub implementation
+    list(APPEND TIMELINE_SOURCES
+      src/timeline/timeline_stub.c
+    )
+    message(STATUS "Timeline: Stub implementation")
+  endif()
+
+  add_library(omnisight_timeline STATIC ${TIMELINE_SOURCES})
+
+  if(ENABLE_HARDWARE_APIS)
+    target_link_libraries(omnisight_timeline
+      PUBLIC ${GLIB_LIBRARIES}
+    )
+  endif()
+endif()
+
+# Swarm Module
+if(ENABLE_SWARM)
+  set(SWARM_SOURCES
+    src/swarm/swarm.c
+  )
+
+  if(ENABLE_HARDWARE_APIS AND ENABLE_MQTT)
+    # Hardware implementation with MQTT
+    list(APPEND SWARM_SOURCES
+      src/swarm/mqtt_client.c
+      src/swarm/federated_learning.c
+    )
+    message(STATUS "Swarm: Hardware implementation (MQTT)")
+  else()
+    # Stub implementation
+    list(APPEND SWARM_SOURCES
+      src/swarm/swarm_stub.c
+    )
+    message(STATUS "Swarm: Stub implementation")
+  endif()
+
+  add_library(omnisight_swarm STATIC ${SWARM_SOURCES})
+
+  if(ENABLE_HARDWARE_APIS AND ENABLE_MQTT)
+    target_link_libraries(omnisight_swarm
+      PUBLIC ${MOSQUITTO_LIB}
+      PUBLIC ${GLIB_LIBRARIES}
+    )
+  endif()
+endif()
+
+# IPC Layer (JSON export for Flask API)
+add_library(omnisight_ipc STATIC
+  src/ipc/json_export.c
+)
+target_link_libraries(omnisight_ipc
+  PUBLIC ${GLIB_LIBRARIES}
+)
+
+# Main application executable
+add_executable(omnisight
+  src/main.c
+  src/omnisight_core.c
+)
+
+# Link all modules
+target_link_libraries(omnisight
+  PRIVATE
+    omnisight_perception
+    omnisight_timeline
+    omnisight_swarm
+    omnisight_ipc
+    Threads::Threads
+    m
+)
+
+# Hardware-specific linking
+if(ENABLE_HARDWARE_APIS)
+  target_link_libraries(omnisight
+    PRIVATE
+      ${GLIB_LIBRARIES}
+      ${VDO_LIBRARIES}
+      ${LAROD_LIBRARIES}
+  )
+
+  if(ENABLE_MQTT)
+    target_link_libraries(omnisight
+      PRIVATE ${MOSQUITTO_LIB}
+    )
+  endif()
+endif()
+
+# Compiler optimizations
+target_compile_options(omnisight PRIVATE
+  -Wall
+  -Wextra
+  -O2
+  -ffunction-sections
+  -fdata-sections
+)
+
+# Linker optimizations (reduce binary size)
+target_link_options(omnisight PRIVATE
+  -Wl,--gc-sections
+  -Wl,--as-needed
+)
+
+# Compiler definitions
+target_compile_definitions(omnisight PRIVATE
+  _GNU_SOURCE
+  OMNISIGHT_VERSION="${PROJECT_VERSION}"
+)
+
+# Installation
+install(TARGETS omnisight
+  RUNTIME DESTINATION bin
+)
+
+# Package configuration
+set(CPACK_PACKAGE_NAME "omnisight")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_VENDOR "OMNISIGHT")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OMNISIGHT Precognitive Security System - Phase 3")
+set(CPACK_GENERATOR "TGZ")
+
+include(CPack)
+
+# Print configuration summary
+message(STATUS "")
+message(STATUS "═══════════════════════════════════════════════")
+message(STATUS "OMNISIGHT Phase 3 Build Configuration")
+message(STATUS "═══════════════════════════════════════════════")
+message(STATUS "  Version:           ${PROJECT_VERSION}")
+message(STATUS "  Build type:        ${CMAKE_BUILD_TYPE}")
+message(STATUS "  C compiler:        ${CMAKE_C_COMPILER}")
+message(STATUS "  Target arch:       ${CMAKE_SYSTEM_PROCESSOR}")
+message(STATUS "")
+message(STATUS "Hardware Integration:")
+message(STATUS "  Hardware APIs:     ${ENABLE_HARDWARE_APIS}")
+message(STATUS "  VDO video:         ${ENABLE_VDO}")
+message(STATUS "  Larod inference:   ${ENABLE_LAROD}")
+message(STATUS "  MQTT swarm:        ${ENABLE_MQTT}")
+message(STATUS "")
+message(STATUS "Modules:")
+message(STATUS "  Perception:        ${ENABLE_PERCEPTION}")
+message(STATUS "  Timeline:          ${ENABLE_TIMELINE}")
+message(STATUS "  Swarm:             ${ENABLE_SWARM}")
+message(STATUS "")
+message(STATUS "═══════════════════════════════════════════════")
+message(STATUS "")

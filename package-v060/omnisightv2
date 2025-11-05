@@ -1,0 +1,7 @@
+#!/bin/sh
+# OMNISIGHT v0.6.0 Entry Point
+# Starts Flask API server on port 8080
+
+echo "Starting OMNISIGHT Flask API Server..."
+cd /usr/local/packages/omnisightv2
+exec python3 app/server.py

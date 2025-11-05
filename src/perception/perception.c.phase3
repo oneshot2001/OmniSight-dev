@@ -1,0 +1,554 @@
+/**
+ * @file perception.c
+ * @brief Phase 3 Hardware Integration - Complete VDO→Larod→Tracker→Behavior Pipeline
+ *
+ * This is the COMPLETE hardware implementation integrating:
+ * - VDO API for video capture
+ * - Larod API for DLPU-accelerated inference
+ * - Tracker for multi-object tracking
+ * - Behavior analysis for threat scoring
+ *
+ * Pipeline: Camera → VDO → Larod → Detections → Tracker → Behaviors → Timeline
+ */
+
+#include "perception.h"
+#include "vdo_capture.h"
+#include "larod_inference.h"
+#include "tracker.h"
+#include "behavior.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <pthread.h>
+#include <time.h>
+#include <sys/time.h>
+
+struct PerceptionEngine {
+    PerceptionConfig config;
+    VdoCapture* vdo;
+    LarodInference* larod;
+    Tracker* tracker;
+    BehaviorAnalyzer* behavior;
+
+    PerceptionCallback callback;
+    void* callback_user_data;
+
+    bool running;
+    pthread_t capture_thread;
+    pthread_mutex_t mutex;
+
+    // Statistics
+    uint32_t frames_processed;
+    uint32_t frames_dropped;
+    float avg_inference_ms;
+    float avg_fps;
+    struct timeval last_frame_time;
+};
+
+// Forward declarations
+static void* capture_thread_func(void* arg);
+static void process_frame(PerceptionEngine* engine, VdoBuffer* buffer);
+static uint64_t get_timestamp_ms(void);
+static float calculate_fps(struct timeval* last_time);
+
+// ============================================================================
+// Public API Implementation
+// ============================================================================
+
+PerceptionEngine* perception_init(const PerceptionConfig* config) {
+    if (!config) {
+        printf("[Perception] Error: NULL configuration\n");
+        return NULL;
+    }
+
+    PerceptionEngine* engine = (PerceptionEngine*)calloc(1, sizeof(PerceptionEngine));
+    if (!engine) {
+        printf("[Perception] Error: Memory allocation failed\n");
+        return NULL;
+    }
+
+    engine->config = *config;
+    engine->running = false;
+    engine->frames_processed = 0;
+    engine->frames_dropped = 0;
+    engine->avg_inference_ms = 0.0f;
+    engine->avg_fps = 0.0f;
+    gettimeofday(&engine->last_frame_time, NULL);
+
+    pthread_mutex_init(&engine->mutex, NULL);
+
+    printf("[Perception] Initializing hardware pipeline...\n");
+
+    // ========================================================================
+    // Step 1: Initialize VDO Capture
+    // ========================================================================
+
+    VdoCaptureConfig vdo_config = {
+        .channel = 1,                    // Primary sensor
+        .width = config->frame_width,
+        .height = config->frame_height,
+        .framerate = config->target_fps,
+        .format = VDO_FORMAT_YUV,        // YUV recommended for Larod
+        .buffer_count = config->buffer_pool_size,
+        .dynamic_framerate = true        // Allow framerate adjustment based on load
+    };
+
+    engine->vdo = vdo_capture_init(&vdo_config);
+    if (!engine->vdo) {
+        printf("[Perception] Error: VDO capture initialization failed\n");
+        perception_destroy(engine);
+        return NULL;
+    }
+    printf("[Perception] VDO capture initialized: %ux%u @ %.1f fps\n",
+           config->frame_width, config->frame_height, config->target_fps);
+
+    // ========================================================================
+    // Step 2: Initialize Larod Inference
+    // ========================================================================
+
+    LarodInferenceConfig larod_config = {
+        .model_path = config->model_path,
+        .device_name = config->use_dlpu ? "dlpu" : "cpu",
+        .width = config->frame_width,
+        .height = config->frame_height,
+        .input_format = VDO_FORMAT_YUV,
+        .confidence_threshold = config->detection_threshold,
+        .max_detections = config->max_tracked_objects
+    };
+
+    engine->larod = larod_inference_init(&larod_config);
+    if (!engine->larod) {
+        printf("[Perception] Error: Larod inference initialization failed\n");
+        perception_destroy(engine);
+        return NULL;
+    }
+    printf("[Perception] Larod inference initialized on %s\n",
+           config->use_dlpu ? "DLPU" : "CPU");
+
+    // ========================================================================
+    // Step 3: Initialize Object Tracker
+    // ========================================================================
+
+    TrackerConfig tracker_config = {
+        .iou_threshold = config->tracking_threshold,
+        .max_age = 30,                   // Keep track for 30 frames without detection
+        .min_hits = 3,                   // Confirm after 3 consecutive detections
+        .max_tracks = config->max_tracked_objects,
+        .use_kalman_filter = true,       // Enable Kalman prediction
+        .feature_similarity_weight = 0.3f // 30% weight on appearance features
+    };
+
+    engine->tracker = tracker_init(&tracker_config);
+    if (!engine->tracker) {
+        printf("[Perception] Error: Tracker initialization failed\n");
+        perception_destroy(engine);
+        return NULL;
+    }
+    printf("[Perception] Tracker initialized (max %u objects)\n",
+           config->max_tracked_objects);
+
+    // ========================================================================
+    // Step 4: Initialize Behavior Analyzer
+    // ========================================================================
+
+    BehaviorConfig behavior_config = {
+        // Loitering detection
+        .loitering_threshold_ms = config->loitering_threshold_ms,
+        .loitering_movement_threshold = 0.05f,  // 5% of frame
+
+        // Running detection
+        .running_velocity_threshold = config->running_velocity_threshold,
+        .running_frames_threshold = 5,
+
+        // Repeated passes
+        .repeated_passes_count = 3,
+        .repeated_passes_window_ms = 60000,  // 1 minute
+
+        // Extended observation
+        .observation_threshold_ms = 10000,    // 10 seconds
+        .observation_gaze_threshold = 0.8f,
+
+        // Threat scoring weights
+        .loitering_weight = 0.3f,
+        .running_weight = 0.5f,
+        .concealing_weight = 0.8f,
+        .repeated_passes_weight = 0.4f,
+        .observation_weight = 0.6f
+    };
+
+    engine->behavior = behavior_init(&behavior_config);
+    if (!engine->behavior) {
+        printf("[Perception] Error: Behavior analyzer initialization failed\n");
+        perception_destroy(engine);
+        return NULL;
+    }
+    printf("[Perception] Behavior analyzer initialized\n");
+
+    printf("[Perception] ✓ Hardware pipeline ready\n");
+    printf("[Perception] Model: %s\n", config->model_path);
+    printf("[Perception] Inference backend: %s\n",
+           config->use_dlpu ? "DLPU (hardware accelerated)" : "CPU");
+
+    return engine;
+}
+
+bool perception_start(
+    PerceptionEngine* engine,
+    PerceptionCallback callback,
+    void* user_data
+) {
+    if (!engine || !callback) {
+        printf("[Perception] Error: Invalid parameters\n");
+        return false;
+    }
+
+    pthread_mutex_lock(&engine->mutex);
+
+    if (engine->running) {
+        pthread_mutex_unlock(&engine->mutex);
+        printf("[Perception] Warning: Already running\n");
+        return false;
+    }
+
+    engine->callback = callback;
+    engine->callback_user_data = user_data;
+    engine->running = true;
+
+    pthread_mutex_unlock(&engine->mutex);
+
+    // Start VDO capture
+    if (!vdo_capture_start(engine->vdo)) {
+        printf("[Perception] Error: Failed to start VDO capture\n");
+        pthread_mutex_lock(&engine->mutex);
+        engine->running = false;
+        pthread_mutex_unlock(&engine->mutex);
+        return false;
+    }
+
+    // Start capture thread for frame polling
+    if (pthread_create(&engine->capture_thread, NULL, capture_thread_func, engine) != 0) {
+        printf("[Perception] Error: Failed to create capture thread\n");
+        vdo_capture_stop(engine->vdo);
+        pthread_mutex_lock(&engine->mutex);
+        engine->running = false;
+        pthread_mutex_unlock(&engine->mutex);
+        return false;
+    }
+
+    printf("[Perception] ✓ Engine started - processing frames\n");
+    return true;
+}
+
+void perception_stop(PerceptionEngine* engine) {
+    if (!engine) {
+        return;
+    }
+
+    pthread_mutex_lock(&engine->mutex);
+
+    if (!engine->running) {
+        pthread_mutex_unlock(&engine->mutex);
+        return;
+    }
+
+    engine->running = false;
+    pthread_mutex_unlock(&engine->mutex);
+
+    // Wait for capture thread to exit
+    pthread_join(engine->capture_thread, NULL);
+
+    // Stop VDO capture
+    vdo_capture_stop(engine->vdo);
+
+    printf("[Perception] Engine stopped\n");
+}
+
+void perception_destroy(PerceptionEngine* engine) {
+    if (!engine) {
+        return;
+    }
+
+    perception_stop(engine);
+
+    if (engine->vdo) {
+        vdo_capture_destroy(engine->vdo);
+    }
+
+    if (engine->larod) {
+        larod_inference_destroy(engine->larod);
+    }
+
+    if (engine->tracker) {
+        tracker_destroy(engine->tracker);
+    }
+
+    if (engine->behavior) {
+        behavior_destroy(engine->behavior);
+    }
+
+    pthread_mutex_destroy(&engine->mutex);
+
+    free(engine);
+
+    printf("[Perception] Engine destroyed\n");
+}
+
+uint32_t perception_process_frame(
+    PerceptionEngine* engine,
+    const uint8_t* frame_data,
+    uint32_t width,
+    uint32_t height,
+    DetectedObject* objects,
+    uint32_t max_objects
+) {
+    if (!engine || !frame_data || !objects) {
+        return 0;
+    }
+
+    // This is for manual frame processing (testing/debugging)
+    // In production, frames come from VDO capture thread
+
+    printf("[Perception] Manual frame processing not fully implemented in Phase 3\n");
+    printf("[Perception] Use perception_start() for automatic VDO capture\n");
+
+    (void)width;
+    (void)height;
+    (void)max_objects;
+
+    return 0;
+}
+
+uint32_t perception_get_tracked_objects(
+    PerceptionEngine* engine,
+    TrackedObject* objects,
+    uint32_t max_objects
+) {
+    if (!engine || !objects) {
+        return 0;
+    }
+
+    pthread_mutex_lock(&engine->mutex);
+    uint32_t count = tracker_get_tracks(engine->tracker, objects, max_objects);
+    pthread_mutex_unlock(&engine->mutex);
+
+    return count;
+}
+
+void perception_update_behavior_params(
+    PerceptionEngine* engine,
+    uint32_t loitering_ms,
+    float running_threshold
+) {
+    if (!engine) {
+        return;
+    }
+
+    pthread_mutex_lock(&engine->mutex);
+
+    engine->config.loitering_threshold_ms = loitering_ms;
+    engine->config.running_velocity_threshold = running_threshold;
+
+    // Update behavior analyzer config
+    BehaviorConfig config;
+    config.loitering_threshold_ms = loitering_ms;
+    config.running_velocity_threshold = running_threshold;
+    behavior_update_config(engine->behavior, &config);
+
+    pthread_mutex_unlock(&engine->mutex);
+
+    printf("[Perception] Updated behavior params: loitering=%ums, running=%.2f\n",
+           loitering_ms, running_threshold);
+}
+
+void perception_get_stats(
+    PerceptionEngine* engine,
+    float* avg_inference_ms,
+    float* avg_fps,
+    uint32_t* dropped_frames
+) {
+    if (!engine) {
+        return;
+    }
+
+    pthread_mutex_lock(&engine->mutex);
+
+    if (avg_inference_ms) *avg_inference_ms = engine->avg_inference_ms;
+    if (avg_fps) *avg_fps = engine->avg_fps;
+    if (dropped_frames) *dropped_frames = engine->frames_dropped;
+
+    pthread_mutex_unlock(&engine->mutex);
+}
+
+// ============================================================================
+// Internal Implementation - The Core Pipeline
+// ============================================================================
+
+/**
+ * Capture thread - polls VDO for frames and processes them
+ */
+static void* capture_thread_func(void* arg) {
+    PerceptionEngine* engine = (PerceptionEngine*)arg;
+    GError* error = NULL;
+
+    printf("[Perception] Capture thread started\n");
+
+    while (engine->running) {
+        // Get next frame from VDO (blocking with timeout)
+        VdoBuffer* buffer = vdo_capture_get_frame(engine->vdo, &error);
+
+        if (!buffer) {
+            if (error) {
+                printf("[Perception] VDO frame error: %s\n", error->message);
+                g_error_free(error);
+                error = NULL;
+            }
+
+            pthread_mutex_lock(&engine->mutex);
+            engine->frames_dropped++;
+            pthread_mutex_unlock(&engine->mutex);
+
+            continue;
+        }
+
+        // Process frame through the pipeline
+        process_frame(engine, buffer);
+
+        // Release buffer back to VDO
+        vdo_capture_release_frame(engine->vdo, buffer);
+    }
+
+    printf("[Perception] Capture thread exiting\n");
+    return NULL;
+}
+
+/**
+ * CORE PIPELINE: VDO Frame → Larod → Detections → Tracker → Behaviors → Callback
+ */
+static void process_frame(PerceptionEngine* engine, VdoBuffer* buffer) {
+    struct timeval start_time, end_time;
+    gettimeofday(&start_time, NULL);
+
+    // ========================================================================
+    // Step 1: Run ML Inference (VDO Buffer → Larod → Detections)
+    // ========================================================================
+
+    DetectedObject detections[100];  // Max 100 detections per frame
+    uint32_t num_detections = 0;
+
+    bool inference_ok = larod_inference_run(
+        engine->larod,
+        buffer,
+        detections,
+        100,
+        &num_detections
+    );
+
+    if (!inference_ok) {
+        printf("[Perception] Inference failed, skipping frame\n");
+        pthread_mutex_lock(&engine->mutex);
+        engine->frames_dropped++;
+        pthread_mutex_unlock(&engine->mutex);
+        return;
+    }
+
+    // Calculate inference time
+    gettimeofday(&end_time, NULL);
+    float inference_ms = (end_time.tv_sec - start_time.tv_sec) * 1000.0f +
+                         (end_time.tv_usec - start_time.tv_usec) / 1000.0f;
+
+    // ========================================================================
+    // Step 2: Update Tracker (Detections → Tracked Objects)
+    // ========================================================================
+
+    TrackedObject tracks[100];  // Max 100 active tracks
+    uint32_t num_tracks = tracker_update(
+        engine->tracker,
+        detections,
+        num_detections,
+        tracks,
+        100
+    );
+
+    // ========================================================================
+    // Step 3: Analyze Behaviors (Tracked Objects → Behaviors + Threat Scores)
+    // ========================================================================
+
+    uint32_t behavior_events = behavior_analyze(
+        engine->behavior,
+        tracks,
+        num_tracks
+    );
+
+    // ========================================================================
+    // Step 4: Call User Callback (Send tracks to Timeline/Swarm)
+    // ========================================================================
+
+    if (engine->callback && num_tracks > 0) {
+        engine->callback(tracks, num_tracks, engine->callback_user_data);
+    }
+
+    // ========================================================================
+    // Step 5: Update Statistics
+    // ========================================================================
+
+    pthread_mutex_lock(&engine->mutex);
+
+    engine->frames_processed++;
+
+    // Update rolling average of inference time
+    float alpha = 0.1f;  // Exponential smoothing factor
+    engine->avg_inference_ms = alpha * inference_ms +
+                               (1.0f - alpha) * engine->avg_inference_ms;
+
+    // Calculate FPS
+    engine->avg_fps = calculate_fps(&engine->last_frame_time);
+
+    // Update VDO framerate if inference is too slow
+    if (vdo_capture_update_framerate(engine->vdo, (unsigned int)engine->avg_inference_ms)) {
+        printf("[Perception] Adjusted framerate based on inference time (%.1fms)\n",
+               engine->avg_inference_ms);
+    }
+
+    pthread_mutex_unlock(&engine->mutex);
+
+    // ========================================================================
+    // Step 6: Periodic Logging (every 100 frames)
+    // ========================================================================
+
+    if (engine->frames_processed % 100 == 0) {
+        printf("[Perception] Stats: %u frames, %.1f fps, %.1fms inference, "
+               "%u tracks, %u behaviors, %u dropped\n",
+               engine->frames_processed,
+               engine->avg_fps,
+               engine->avg_inference_ms,
+               num_tracks,
+               behavior_events,
+               engine->frames_dropped);
+    }
+}
+
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
+static uint64_t get_timestamp_ms(void) {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (uint64_t)tv.tv_sec * 1000 + (uint64_t)tv.tv_usec / 1000;
+}
+
+static float calculate_fps(struct timeval* last_time) {
+    struct timeval current_time;
+    gettimeofday(&current_time, NULL);
+
+    float elapsed_ms = (current_time.tv_sec - last_time->tv_sec) * 1000.0f +
+                       (current_time.tv_usec - last_time->tv_usec) / 1000.0f;
+
+    *last_time = current_time;
+
+    if (elapsed_ms > 0.0f) {
+        return 1000.0f / elapsed_ms;  // Frames per second
+    }
+
+    return 0.0f;
+}

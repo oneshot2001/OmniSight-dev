@@ -1,30 +1,27 @@
 {
-    "schemaVersion": "1.5",
-    "acapPackageConf": {
-        "setup": {
-            "appName": "omnisight",
-            "vendor": "OMNISIGHT",
-            "vendorUrl": "https://github.com/oneshot2001/OmniSight-dev",
-            "version": "0.1.0",
-            "appId": 1001,
-            "embeddedSdkVersion": "3.5",
-            "user": {
-                "username": "sdk",
-                "group": "sdk"
-            },
-            "friendlyName": "OMNISIGHT Precognitive Security",
-            "architecture": "aarch64",
-            "runMode": "respawn",
-            "runOptions": ""
-        },
-        "configuration": {
-            "settingPage": "html/index.html"
-        },
-        "resources": {
-            "memory": {
-                "ram": 256,
-                "ramMax": 512
-            }
-        }
+  "schemaVersion": "1.8.0",
+  "acapPackageConf": {
+    "setup": {
+      "appName": "omnisight",
+      "friendlyName": "OMNISIGHT - Phase 4 Claude Flow",
+      "vendor": "OMNISIGHT",
+      "vendorUrl": "https://github.com/oneshot2001/OmniSight-dev",
+      "embeddedSdkVersion": "3.0",
+      "version": "0.4.0",
+      "appId": 1004,
+      "runMode": "respawn",
+      "runOptions": "/usr/local/packages/omnisight/omnisight-phase4.sh",
+      "architecture": "aarch64"
     }
+  },
+  "configuration": {
+    "settingPage": "index.html",
+    "reverseProxy": [
+      {
+        "apiPath": "api",
+        "target": "http://localhost:8080",
+        "access": "admin"
+      }
+    ]
+  }
 }

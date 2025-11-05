@@ -1,0 +1,169 @@
+# OMNISIGHT Perception Engine
+# CMakeLists.txt - Phase 3 Hardware Integration
+
+cmake_minimum_required(VERSION 3.16)
+project(omnisight_perception VERSION 0.4.0 LANGUAGES C)
+
+# C Standard
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# ============================================================================
+# Source File Selection (Hardware vs Stub)
+# ============================================================================
+
+if(ENABLE_HARDWARE_APIS)
+  message(STATUS "Perception: Using hardware implementation")
+
+  set(PERCEPTION_SOURCES
+    perception.c           # Main integration layer
+    vdo_capture.c         # VDO video capture
+    larod_inference.c     # Larod ML inference
+    tracker.c             # Multi-object tracking
+    behavior.c            # Behavior analysis
+  )
+
+  set(PERCEPTION_BUILD_MODE "(hardware)" PARENT_SCOPE)
+
+else()
+  message(STATUS "Perception: Using stub implementation")
+
+  set(PERCEPTION_SOURCES
+    perception_stub.c     # Stub with simulated detections
+  )
+
+  set(PERCEPTION_BUILD_MODE "(stub)" PARENT_SCOPE)
+
+endif()
+
+# Header files (always included)
+set(PERCEPTION_HEADERS
+  perception.h
+  vdo_capture.h
+  larod_inference.h
+  tracker.h
+  behavior.h
+)
+
+# ============================================================================
+# Library Target
+# ============================================================================
+
+# Build static library for easier linking
+add_library(omnisight_perception STATIC ${PERCEPTION_SOURCES})
+
+# Include directories
+target_include_directories(omnisight_perception
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+# ============================================================================
+# Link Libraries
+# ============================================================================
+
+# Standard libraries (always needed)
+target_link_libraries(omnisight_perception
+  PUBLIC
+    m          # Math library
+    pthread    # Threading
+)
+
+# Hardware libraries (Phase 3 only)
+if(ENABLE_HARDWARE_APIS)
+  target_link_libraries(omnisight_perception
+    PUBLIC
+      ${VDO_LIBRARIES}
+      ${LAROD_LIBRARIES}
+      ${GLIB_LIBRARIES}
+  )
+
+  # Add hardware-specific include directories
+  target_include_directories(omnisight_perception
+    PUBLIC
+      ${VDO_INCLUDE_DIRS}
+      ${LAROD_INCLUDE_DIRS}
+      ${GLIB_INCLUDE_DIRS}
+  )
+endif()
+
+# ============================================================================
+# Compiler Options
+# ============================================================================
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  target_compile_options(omnisight_perception PRIVATE
+    -Wall
+    -Wextra
+    -O3
+    -ffast-math          # Optimize floating point
+    -funroll-loops       # Unroll small loops
+  )
+
+  # Hardware-specific optimizations
+  if(ENABLE_HARDWARE_APIS)
+    target_compile_options(omnisight_perception PRIVATE
+      -march=armv8-a     # ARTPEC-8/9 (ARM Cortex-A53)
+      -mtune=cortex-a53
+      -mfpu=neon         # NEON SIMD instructions
+    )
+  endif()
+
+else()
+  target_compile_options(omnisight_perception PRIVATE
+    -Wall
+    -Wextra
+    -O0
+    -g
+  )
+endif()
+
+# ============================================================================
+# Compiler Definitions
+# ============================================================================
+
+target_compile_definitions(omnisight_perception PRIVATE
+  _GNU_SOURCE
+  OMNISIGHT_VERSION="${PROJECT_VERSION}"
+)
+
+if(ENABLE_HARDWARE_APIS)
+  target_compile_definitions(omnisight_perception PRIVATE
+    OMNISIGHT_HARDWARE_BUILD=1
+  )
+else()
+  target_compile_definitions(omnisight_perception PRIVATE
+    OMNISIGHT_STUB_BUILD=1
+  )
+endif()
+
+# ============================================================================
+# Installation
+# ============================================================================
+
+install(TARGETS omnisight_perception
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+
+install(FILES ${PERCEPTION_HEADERS}
+  DESTINATION include/omnisight
+)
+
+# Export compile commands for IDEs
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# ============================================================================
+# Module Summary
+# ============================================================================
+
+message(STATUS "")
+message(STATUS "Perception Module Configuration:")
+message(STATUS "  Sources:       ${PERCEPTION_SOURCES}")
+message(STATUS "  Hardware mode: ${ENABLE_HARDWARE_APIS}")
+if(ENABLE_HARDWARE_APIS)
+  message(STATUS "  VDO support:   Enabled")
+  message(STATUS "  Larod support: Enabled")
+  message(STATUS "  Optimization:  -O3 -march=armv8-a -mfpu=neon")
+endif()
+message(STATUS "")

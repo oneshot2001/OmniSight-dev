@@ -3,9 +3,36 @@ Swarm API Blueprint
 Handles swarm intelligence and multi-camera networking
 """
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, current_app
 
 swarm_bp = Blueprint('swarm', __name__)
+
+
+@swarm_bp.route('/status', methods=['GET'])
+def get_swarm_status():
+  """
+  Returns swarm module status and metrics
+
+  Returns:
+    JSON with swarm statistics
+  """
+  ipc = current_app.config['IPC_CLIENT']
+  stats = ipc.get_stats()
+
+  if not stats:
+    return jsonify({
+      "error": "Stats not available"
+    }), 503
+
+  swarm_stats = stats.get('swarm', {})
+  return jsonify({
+    "enabled": True,
+    "num_neighbors": swarm_stats.get('num_neighbors', 0),
+    "tracks_shared": swarm_stats.get('tracks_shared', 0),
+    "events_shared": swarm_stats.get('events_shared', 0),
+    "network_health": swarm_stats.get('network_health', 0),
+    "module": "swarm"
+  })
 
 
 @swarm_bp.route('/network', methods=['GET'])
@@ -16,6 +43,8 @@ def get_network():
   Returns:
     JSON with local camera ID, neighbors, and network health
   """
+  # Swarm data is more complex, keep stub for now
+  # Will be updated when swarm module is fully integrated
   return jsonify({
     "local_camera_id": "CAM001",
     "neighbors": [

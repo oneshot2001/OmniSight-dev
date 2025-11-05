@@ -30,6 +30,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/src/perception
   ${CMAKE_CURRENT_SOURCE_DIR}/src/timeline
   ${CMAKE_CURRENT_SOURCE_DIR}/src/swarm
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/http
 )
 
 # Add subdirectories for modules
@@ -45,6 +46,19 @@ if(ENABLE_SWARM)
   add_subdirectory(src/swarm)
 endif()
 
+# HTTP server library
+add_library(omnisight_http STATIC
+  src/http/mongoose.c
+  src/http/http_server.c
+)
+
+target_compile_options(omnisight_http PRIVATE
+  -Wall
+  -Wextra
+  -O2
+  -DMG_ENABLE_PACKED_FS=0
+)
+
 # Main application executable
 add_executable(omnisight
   src/main.c
@@ -57,6 +71,7 @@ target_link_libraries(omnisight
     omnisight_perception
     omnisight_timeline
     omnisight_swarm
+    omnisight_http
     Threads::Threads
     m
 )
@@ -74,6 +89,29 @@ target_compile_definitions(omnisight PRIVATE
   OMNISIGHT_VERSION="${PROJECT_VERSION}"
   OMNISIGHT_STUB_BUILD=1
 )
+
+# Test executable for HTTP server
+if(BUILD_TESTING)
+  add_executable(test_http_server
+    src/http/test_http_server.c
+  )
+
+  target_link_libraries(test_http_server
+    PRIVATE
+      omnisight_perception
+      omnisight_timeline
+      omnisight_swarm
+      omnisight_http
+      Threads::Threads
+      m
+  )
+
+  target_compile_definitions(test_http_server PRIVATE
+    _GNU_SOURCE
+    OMNISIGHT_VERSION="${PROJECT_VERSION}"
+    OMNISIGHT_STUB_BUILD=1
+  )
+endif()
 
 # Installation
 install(TARGETS omnisight

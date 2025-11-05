@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "omnisight_core.h"
+#include "ipc/json_export.h"
 
 // Global state
 static volatile bool running = true;
@@ -140,15 +141,51 @@ static void print_stats(OmnisightCore* core) {
  */
 static void run_main_loop(OmnisightCore* core) {
     printf("[MAIN] OMNISIGHT is now operational\n");
-    printf("[MAIN] Press Ctrl+C to stop | Type 'stats' for status\n\n");
+    printf("[MAIN] Press Ctrl+C to stop | Type 'stats' for status\n");
+    printf("[MAIN] Exporting JSON to /tmp/omnisight_*.json for Flask API\n\n");
 
     int iteration = 0;
     int stats_counter = 0;
+    int json_export_counter = 0;
+
+    // Initial status export
+    json_export_status("running", 0);
 
     while (running) {
         // Process OMNISIGHT
         if (!omnisight_process(core)) {
             printf("[MAIN] Warning: Processing failed\n");
+        }
+
+        // Export JSON every second (10 iterations at 100ms)
+        json_export_counter++;
+        if (json_export_counter >= 10) {
+            // Get current stats
+            OmnisightStats stats;
+            omnisight_get_stats(core, &stats);
+
+            // Export stats
+            json_export_stats(&stats);
+
+            // Export status with uptime
+            json_export_status("running", stats.uptime_ms);
+
+            // Get and export current data
+            TrackedObject tracks[50];
+            uint32_t num_tracks;
+            num_tracks = omnisight_get_tracked_objects(core, tracks, 50);
+            if (num_tracks > 0) {
+                json_export_tracks(tracks, num_tracks);
+            }
+
+            Timeline timelines[5];
+            uint32_t num_timelines;
+            num_timelines = omnisight_get_timelines(core, timelines, 5);
+            if (num_timelines > 0) {
+                json_export_timelines(timelines, num_timelines);
+            }
+
+            json_export_counter = 0;
         }
 
         // Check for interventions every 5 seconds
@@ -174,6 +211,9 @@ static void run_main_loop(OmnisightCore* core) {
         iteration++;
         usleep(100000);  // 100ms
     }
+
+    // Final status export
+    json_export_status("stopped", 0);
 
     printf("\n[MAIN] Main loop terminated\n");
 }

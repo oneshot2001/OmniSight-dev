@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# OMNISIGHT Phase 4 V3 - Native HTTP Server
+# Uses Python SimpleHTTPServer if available, falls back to static files
+#
+
+# Log startup
+echo "OMNISIGHT Phase 4 V3: Starting native HTTP server..."
+
+# Set HTML directory
+export OMNISIGHT_HTML_DIR=/usr/local/packages/omnisight/html
+
+# Navigate to HTML directory
+cd /usr/local/packages/omnisight/html || exit 1
+
+# Try Python 3 first
+if command -v python3 >/dev/null 2>&1; then
+  echo "OMNISIGHT: Using Python 3 HTTP server"
+  exec python3 -m http.server 8080
+fi
+
+# Try Python 2
+if command -v python >/dev/null 2>&1; then
+  echo "OMNISIGHT: Using Python 2 HTTP server"
+  exec python -m SimpleHTTPServer 8080
+fi
+
+# Fallback: Just keep running (reverse proxy will serve static files)
+echo "OMNISIGHT: No Python found, using Apache reverse proxy for static files"
+echo "OMNISIGHT: Web interface available via camera web UI"
+
+# Keep the service running
+while true; do
+  sleep 3600
+done

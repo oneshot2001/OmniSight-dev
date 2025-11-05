@@ -1,0 +1,252 @@
+# OMNISIGHT - Precognitive Security System
+# CMakeLists.txt - Phase 3 Hardware Integration Build
+#
+# This build configuration enables real hardware APIs:
+# - VDO for video capture
+# - Larod for DLPU inference
+# - GLib for event loops
+#
+# Usage:
+#   cmake -DENABLE_HARDWARE_APIS=ON -DCMAKE_TOOLCHAIN_FILE=/opt/axis/acapsdk/sysroots/x86_64-oesdk-linux/usr/share/cmake/Modules/AxisToolchain.cmake ..
+
+cmake_minimum_required(VERSION 3.16)
+project(OMNISIGHT VERSION 0.4.0 LANGUAGES C)
+
+# C Standard
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Build type
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# ============================================================================
+# Build Options
+# ============================================================================
+
+option(BUILD_TESTING "Build test programs" OFF)
+option(BUILD_EXAMPLES "Build example programs" OFF)
+option(ENABLE_TIMELINE "Enable Timeline Threading module" ON)
+option(ENABLE_SWARM "Enable Swarm Intelligence module" ON)
+option(ENABLE_PERCEPTION "Enable Perception engine" ON)
+
+# NEW: Hardware API support
+option(ENABLE_HARDWARE_APIS "Enable VDO and Larod hardware APIs" OFF)
+
+# ============================================================================
+# Hardware Dependencies (Phase 3)
+# ============================================================================
+
+if(ENABLE_HARDWARE_APIS)
+  message(STATUS "Hardware API mode enabled - linking VDO, Larod, GLib")
+
+  # Find pkg-config
+  find_package(PkgConfig REQUIRED)
+
+  # Find VDO (Video Device Object API)
+  pkg_check_modules(VDO REQUIRED vdo)
+  if(NOT VDO_FOUND)
+    message(FATAL_ERROR "VDO library not found. Ensure ACAP SDK is installed.")
+  endif()
+
+  # Find Larod (ML inference API)
+  pkg_check_modules(LAROD REQUIRED larod)
+  if(NOT LAROD_FOUND)
+    message(FATAL_ERROR "Larod library not found. Ensure ACAP SDK is installed.")
+  endif()
+
+  # Find GLib (required by VDO/Larod)
+  pkg_check_modules(GLIB REQUIRED glib-2.0)
+  if(NOT GLIB_FOUND)
+    message(FATAL_ERROR "GLib not found. Ensure ACAP SDK is installed.")
+  endif()
+
+  # Add hardware include directories
+  include_directories(
+    ${VDO_INCLUDE_DIRS}
+    ${LAROD_INCLUDE_DIRS}
+    ${GLIB_INCLUDE_DIRS}
+  )
+
+  # Add hardware library directories
+  link_directories(
+    ${VDO_LIBRARY_DIRS}
+    ${LAROD_LIBRARY_DIRS}
+    ${GLIB_LIBRARY_DIRS}
+  )
+
+  # Compiler definitions for hardware mode
+  add_compile_definitions(OMNISIGHT_HARDWARE_BUILD=1)
+
+else()
+  message(STATUS "Stub mode - no hardware dependencies")
+  add_compile_definitions(OMNISIGHT_STUB_BUILD=1)
+endif()
+
+# ============================================================================
+# Standard Dependencies
+# ============================================================================
+
+find_package(Threads REQUIRED)
+
+# Common include directories
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/perception
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/timeline
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/swarm
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ipc
+)
+
+# ============================================================================
+# Module Subdirectories
+# ============================================================================
+
+if(ENABLE_PERCEPTION)
+  add_subdirectory(src/perception)
+endif()
+
+if(ENABLE_TIMELINE)
+  add_subdirectory(src/timeline)
+endif()
+
+if(ENABLE_SWARM)
+  add_subdirectory(src/swarm)
+endif()
+
+# ============================================================================
+# IPC Layer (Phase 2+)
+# ============================================================================
+
+add_library(omnisight_ipc STATIC
+  src/ipc/json_export.c
+)
+
+target_include_directories(omnisight_ipc
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ipc
+)
+
+target_link_libraries(omnisight_ipc
+  PUBLIC
+    m
+    pthread
+)
+
+# ============================================================================
+# Main Application
+# ============================================================================
+
+add_executable(omnisight
+  src/main.c
+  src/omnisight_core.c
+)
+
+# Link modules
+target_link_libraries(omnisight
+  PRIVATE
+    omnisight_perception
+    omnisight_timeline
+    omnisight_swarm
+    omnisight_ipc
+    Threads::Threads
+    m
+)
+
+# Link hardware libraries if enabled
+if(ENABLE_HARDWARE_APIS)
+  target_link_libraries(omnisight
+    PRIVATE
+      ${VDO_LIBRARIES}
+      ${LAROD_LIBRARIES}
+      ${GLIB_LIBRARIES}
+  )
+endif()
+
+# Compiler optimizations
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  target_compile_options(omnisight PRIVATE
+    -Wall
+    -Wextra
+    -O3
+    -march=armv8-a  # ARTPEC-8/9 optimization
+    -mtune=cortex-a53
+  )
+else()
+  target_compile_options(omnisight PRIVATE
+    -Wall
+    -Wextra
+    -O0
+    -g
+  )
+endif()
+
+# Compiler definitions
+target_compile_definitions(omnisight PRIVATE
+  _GNU_SOURCE
+  OMNISIGHT_VERSION="${PROJECT_VERSION}"
+)
+
+# ============================================================================
+# Installation
+# ============================================================================
+
+install(TARGETS omnisight
+  RUNTIME DESTINATION bin
+)
+
+# Install models directory for Phase 3
+if(ENABLE_HARDWARE_APIS)
+  install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/models/
+    DESTINATION models
+    FILES_MATCHING PATTERN "*.tflite"
+  )
+endif()
+
+# ============================================================================
+# Package Configuration
+# ============================================================================
+
+set(CPACK_PACKAGE_NAME "omnisight")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_VENDOR "OMNISIGHT")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OMNISIGHT Precognitive Security System - Phase 3 Hardware")
+set(CPACK_GENERATOR "TGZ")
+
+include(CPack)
+
+# ============================================================================
+# Configuration Summary
+# ============================================================================
+
+message(STATUS "")
+message(STATUS "========================================")
+message(STATUS "OMNISIGHT Phase 3 Build Configuration")
+message(STATUS "========================================")
+message(STATUS "  Version:           ${PROJECT_VERSION}")
+message(STATUS "  Build type:        ${CMAKE_BUILD_TYPE}")
+message(STATUS "  C compiler:        ${CMAKE_C_COMPILER}")
+message(STATUS "  Hardware APIs:     ${ENABLE_HARDWARE_APIS}")
+if(ENABLE_HARDWARE_APIS)
+  message(STATUS "  VDO version:       ${VDO_VERSION}")
+  message(STATUS "  Larod version:     ${LAROD_VERSION}")
+  message(STATUS "  GLib version:      ${GLIB_VERSION}")
+endif()
+message(STATUS "")
+message(STATUS "Modules:")
+message(STATUS "  Perception:        ${ENABLE_PERCEPTION} ${PERCEPTION_BUILD_MODE}")
+message(STATUS "  Timeline:          ${ENABLE_TIMELINE}")
+message(STATUS "  Swarm:             ${ENABLE_SWARM}")
+message(STATUS "  Testing:           ${BUILD_TESTING}")
+message(STATUS "")
+message(STATUS "Build mode: ${CMAKE_BUILD_TYPE}")
+if(ENABLE_HARDWARE_APIS)
+  message(STATUS "Target: aarch64 (ARTPEC-8/9)")
+else()
+  message(STATUS "Target: host (stub mode)")
+endif()
+message(STATUS "========================================")
+message(STATUS "")

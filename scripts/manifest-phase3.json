@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.8.0",
+  "acapPackageConf": {
+    "setup": {
+      "appName": "omnisight",
+      "friendlyName": "OMNISIGHT - Hardware (Phase 3)",
+      "vendor": "OMNISIGHT",
+      "version": "0.4.0",
+      "embeddedSdkVersion": "3.0",
+      "runMode": "respawn",
+      "runOptions": "-e OMNISIGHT_HARDWARE_MODE=1",
+      "architecture": "aarch64"
+    },
+    "configuration": {
+      "settingPage": "index.html",
+      "httpConfig": [
+        {
+          "type": "transferEncoding",
+          "enable": true
+        },
+        {
+          "type": "cors",
+          "enable": true
+        }
+      ],
+      "reverseProxy": [
+        {
+          "apiPath": "api",
+          "target": "http://localhost:8080/api",
+          "access": "admin"
+        }
+      ]
+    },
+    "resources": {
+      "memory": {
+        "ram": 512
+      },
+      "storage": {
+        "data": 100
+      }
+    },
+    "permissions": {
+      "video": {
+        "streamResolution": {
+          "width": 1920,
+          "height": 1080
+        },
+        "streamFramerate": 10,
+        "captureFrequency": "continuous"
+      },
+      "inference": {
+        "accelerator": "artpec8-dlpu",
+        "models": ["custom"],
+        "maxMemory": 256
+      },
+      "network": {
+        "mqtt": {
+          "enable": true,
+          "clientId": "omnisight-${DEVICE_ID}"
+        }
+      },
+      "system": {
+        "syslog": true,
+        "systemdJournal": true
+      }
+    }
+  }
+}

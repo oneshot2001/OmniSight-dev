@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OMNISIGHT - Clean Build</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .success {
+            background: #4CAF50;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 OMNISIGHT - Clean Build v1.0.0</h1>
+
+        <div class="success">
+            ✓ SUCCESS! The Open button worked!
+        </div>
+
+        <div class="info">
+            <h3>Configuration Details:</h3>
+            <ul>
+                <li><strong>Schema:</strong> 1.5 (simplified)</li>
+                <li><strong>settingPage:</strong> index.html</li>
+                <li><strong>SETTINGSPAGEFILE:</strong> index.html</li>
+                <li><strong>runMode:</strong> never</li>
+                <li><strong>Package:</strong> Minimal clean build</li>
+            </ul>
+        </div>
+
+        <div class="info">
+            <h3>Build Strategy:</h3>
+            <p>This is a <strong>minimal clean build</strong> with only the essential files:</p>
+            <ul>
+                <li>manifest.json (schema 1.5)</li>
+                <li>package.conf</li>
+                <li>param.conf (empty)</li>
+                <li>html/index.html</li>
+            </ul>
+            <p><strong>NO binary, NO libraries, NO complex configuration.</strong></p>
+        </div>
+
+        <p style="text-align: center; margin-top: 30px; color: #666;">
+            If you're reading this, the ACAP package loaded successfully<br>
+            and the Open button appeared in the camera web interface!
+        </p>
+    </div>
+</body>
+</html>

@@ -37,6 +37,10 @@ $CC $CFLAGS $DEFINES $INCLUDES -c "$SRC_DIR/timeline/timeline_stub.c" -o "$BUILD
 echo "  - swarm_stub.c"
 $CC $CFLAGS $DEFINES $INCLUDES -c "$SRC_DIR/swarm/swarm_stub.c" -o "$BUILD_DIR/swarm_stub.o"
 
+# Compile IPC JSON export
+echo "  - json_export.c"
+$CC $CFLAGS $DEFINES $INCLUDES -c "$SRC_DIR/ipc/json_export.c" -o "$BUILD_DIR/json_export.o"
+
 # Compile core
 echo "  - omnisight_core.c"
 $CC $CFLAGS $DEFINES $INCLUDES -c "$SRC_DIR/omnisight_core.c" -o "$BUILD_DIR/omnisight_core.o"
@@ -55,6 +59,7 @@ $CC -o "$BUILD_DIR/omnisight" \
     "$BUILD_DIR/perception_stub.o" \
     "$BUILD_DIR/timeline_stub.o" \
     "$BUILD_DIR/swarm_stub.o" \
+    "$BUILD_DIR/json_export.o" \
     $LIBS
 
 echo ""

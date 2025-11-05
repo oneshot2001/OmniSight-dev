@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.8.0",
+  "acapPackageConf": {
+    "setup": {
+      "appName": "omnisight",
+      "friendlyName": "OMNISIGHT - Phase 4 V3 Native",
+      "vendor": "OMNISIGHT",
+      "vendorUrl": "https://github.com/oneshot2001/OmniSight-dev",
+      "embeddedSdkVersion": "3.0",
+      "version": "0.4.2",
+      "appId": 1005,
+      "runMode": "respawn",
+      "runOptions": "/usr/local/packages/omnisight/omnisight",
+      "architecture": "aarch64"
+    }
+  },
+  "configuration": {
+    "settingPage": "index.html",
+    "reverseProxy": [
+      {
+        "apiPath": "api",
+        "target": "http://localhost:8080",
+        "access": "admin"
+      }
+    ]
+  }
+}
