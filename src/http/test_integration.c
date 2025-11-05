@@ -54,11 +54,68 @@ int main(int argc, char* argv[]) {
 
     printf("Initializing OMNISIGHT core...\n");
 
-    // Create configuration with correct field names
+    // Create configuration with correct field names and module configs
     OmnisightConfig config = {
         .camera_id = 1,
         .camera_name = "Test Camera",
         .location = "Local Test",
+
+        // Perception module config
+        .perception = {
+            .frame_width = 1920,
+            .frame_height = 1080,
+            .target_fps = 25,
+            .model_path = "/opt/models/omnisight.onnx",
+            .use_dlpu = false,
+            .inference_threads = 2,
+            .detection_threshold = 0.5,
+            .tracking_threshold = 0.3,
+            .max_tracked_objects = 50,
+            .loitering_threshold_ms = 30000,
+            .running_velocity_threshold = 3.0,
+            .async_inference = true,
+            .buffer_pool_size = 4
+        },
+
+        // Timeline module config
+        .timeline = {
+            .prediction_horizon_ms = 300000,  // 5 minutes
+            .time_step_ms = 1000,             // 1 second
+            .max_timelines = 5,
+            .branch_threshold = 0.3,
+            .merge_threshold = 0.8,
+            .event_threshold = 0.5,
+            .enable_intervention_search = true,
+            .max_iterations = 100,
+            .use_gpu = false
+        },
+
+        // Swarm module config
+        .swarm = {
+            .camera_id = 1,
+            .role = 1,  // SWARM_ROLE_INTERNAL
+            .geometry = {
+                .x = 0.0, .y = 0.0, .z = 3.0,
+                .pan = 0.0, .tilt = 0.0, .zoom = 1.0,
+                .fov_horizontal = 90.0,
+                .fov_vertical = 60.0,
+                .coverage_radius = 20.0
+            },
+            .privacy = 1,  // PRIVACY_FEATURES
+            .mqtt_broker = "localhost",
+            .mqtt_port = 1883,
+            .mqtt_client_id = "omnisight_test",
+            .mqtt_username = NULL,
+            .mqtt_password = NULL,
+            .heartbeat_interval_ms = 5000,
+            .track_share_interval_ms = 1000,
+            .consensus_timeout_ms = 2000,
+            .handoff_lookahead_ms = 3000,
+            .federated_learning_enabled = false,
+            .model_update_interval_ms = 60000,
+            .min_improvement_threshold = 0.01
+        },
+
         .enable_perception = true,
         .enable_timeline = true,
         .enable_swarm = true,

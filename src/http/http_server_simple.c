@@ -128,10 +128,7 @@ static void event_handler(struct mg_connection *c, int ev, void *ev_data) {
     if (ev == MG_EV_HTTP_MSG) {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
 
-        // CORS headers
-        mg_printf(c, "Access-Control-Allow-Origin: *\r\n");
-
-        // Handle OPTIONS
+        // Handle OPTIONS (CORS preflight)
         if (mg_strcmp(hm->method, mg_str("OPTIONS")) == 0) {
             mg_http_reply(c, 204, "Access-Control-Allow-Origin: *\r\n", "");
             return;
