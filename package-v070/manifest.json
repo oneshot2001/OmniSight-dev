@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.8.0",
+  "acapPackageConf": {
+    "setup": {
+      "appName": "omnisight",
+      "friendlyName": "OMNISIGHT - Precognitive Security",
+      "vendor": "OMNISIGHT",
+      "vendorUrl": "https://github.com/oneshot2001/OmniSight-dev",
+      "version": "0.7.0",
+      "appId": 1001,
+      "embeddedSdkVersion": "3.0",
+      "user": {
+        "username": "sdk",
+        "group": "sdk"
+      },
+      "architecture": "aarch64",
+      "runMode": "respawn",
+      "runOptions": ""
+    },
+    "configuration": {
+      "settingPage": "index.html",
+      "reverseProxy": [
+        {
+          "apiPath": "api",
+          "target": "http://localhost:8080",
+          "access": "admin"
+        }
+      ]
+    },
+    "resources": {
+      "memory": {
+        "ram": 128,
+        "ramMax": 256
+      }
+    }
+  }
+}
