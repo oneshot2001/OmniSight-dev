@@ -24,6 +24,7 @@ struct HTTPServer {
     OmnisightCore* core;
     int port;
     bool running;
+    char web_root[256];  // Path to web root for static files
 };
 
 // Global server instance
@@ -45,7 +46,7 @@ static void send_error(struct mg_connection *c, int status, const char* msg);
 /**
  * Create HTTP server instance
  */
-HTTPServer* http_server_create(OmnisightCore* core, int port) {
+HTTPServer* http_server_create(OmnisightCore* core, int port, const char* web_root) {
     HTTPServer* server = (HTTPServer*)malloc(sizeof(HTTPServer));
     if (!server) {
         fprintf(stderr, "Failed to allocate HTTP server\n");
@@ -56,8 +57,17 @@ HTTPServer* http_server_create(OmnisightCore* core, int port) {
     server->port = port;
     server->running = false;
 
+    // Set web root (default for ACAP if not specified)
+    if (web_root) {
+        snprintf(server->web_root, sizeof(server->web_root), "%s", web_root);
+    } else {
+        snprintf(server->web_root, sizeof(server->web_root), "/usr/local/packages/omnisightv2/html");
+    }
+
     mg_mgr_init(&server->mgr);
     g_server = server;
+
+    printf("Web root: %s\n", server->web_root);
 
     return server;
 }
@@ -160,9 +170,9 @@ static void event_handler(struct mg_connection *c, int ev, void *ev_data) {
             handle_config_get(c);
         }
         else {
-            // Serve static files
+            // Serve static files from configured web root
             struct mg_http_serve_opts opts = {
-                .root_dir = "/usr/local/packages/omnisightv2/html",
+                .root_dir = g_server->web_root,
                 .extra_headers = "Access-Control-Allow-Origin: *\r\n"
             };
             mg_http_serve_dir(c, hm, &opts);

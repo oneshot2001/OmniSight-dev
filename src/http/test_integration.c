@@ -143,8 +143,9 @@ int main(int argc, char* argv[]) {
 
     printf("Creating HTTP server...\n");
 
-    // Create HTTP server
-    HTTPServer* server = http_server_create(core, port);
+    // Create HTTP server with local web root for testing
+    const char* web_root = "build-integration-test/html";
+    HTTPServer* server = http_server_create(core, port, web_root);
     if (!server) {
         fprintf(stderr, "Failed to create HTTP server\n");
         omnisight_stop(core);

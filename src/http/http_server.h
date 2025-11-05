@@ -21,9 +21,10 @@ typedef struct HTTPServer HTTPServer;
  *
  * @param core Pointer to OMNISIGHT core instance
  * @param port Port number to listen on (typically 8080)
+ * @param web_root Path to web root directory for static files (or NULL for default)
  * @return Pointer to HTTPServer instance, or NULL on failure
  */
-HTTPServer* http_server_create(OmnisightCore* core, int port);
+HTTPServer* http_server_create(OmnisightCore* core, int port, const char* web_root);
 
 /**
  * Start HTTP server
